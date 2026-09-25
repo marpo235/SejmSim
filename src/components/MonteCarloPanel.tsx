@@ -11,6 +11,7 @@ import {
 } from "recharts";
 import { PARTIES, SPECTRUM_ORDER } from "@/data/parties";
 import type { MonteCarloResult } from "@/engine/types";
+import { useT } from "@/lib/i18n";
 import { fmtPct } from "@/lib/utils";
 
 const CHART_PROPS = {
@@ -19,11 +20,12 @@ const CHART_PROPS = {
 };
 
 function HistTooltip({ active, payload }: any) {
+  const t = useT();
   if (!active || !payload?.length) return null;
   const d = payload[0].payload;
   return (
     <div className="rounded border border-slate-700 bg-slate-900 px-2 py-1 text-[11px] num">
-      {d.seat} seats: <b>{fmtPct(d.share, 1)}</b>
+      {d.seat} {t.mcPanel.seatsUnit}: <b>{fmtPct(d.share, 1)}</b>
     </div>
   );
 }
@@ -73,6 +75,7 @@ function PartyHistogram({ result, party }: { result: MonteCarloResult; party: (t
 }
 
 export function MonteCarloPanel({ mc }: { mc: MonteCarloResult }) {
+  const t = useT();
   const mortality = useMemo(
     () =>
       mc.distributions.map((d) => ({
@@ -84,33 +87,32 @@ export function MonteCarloPanel({ mc }: { mc: MonteCarloResult }) {
     [mc]
   );
   const coalData = useMemo(() => {
-    const arr = mc.coalitions.map((c) => ({
-      name: c.name,
+    const arr = mc.coalitions.map((c, i) => ({
+      name: t.mcPanel.coalNames[i] ?? c.name,
       p: +(c.pMajority * 100).toFixed(1),
       p276: +(c.pConstitutional * 100).toFixed(1),
       med: c.medianSeats,
     }));
     if (mc.customCoalition)
       arr.push({
-        name: "Custom",
+        name: t.mcPanel.custom,
         p: +(mc.customCoalition.pMajority * 100).toFixed(1),
         p276: +(mc.customCoalition.pConstitutional * 100).toFixed(1),
         med: mc.customCoalition.medianSeats,
       });
     return arr;
-  }, [mc]);
+  }, [mc, t]);
 
   return (
     <div className="space-y-4">
       <div className="num text-[11px] text-slate-500">
-        {mc.iterations.toLocaleString()} iterations · {mc.elapsedMs.toFixed(0)} ms in-worker ·
-        logit-normal sampler σ + 41-district D'Hondt
+        {t.mcPanel.subtitle(mc.iterations.toLocaleString(), mc.elapsedMs.toFixed(0))}
       </div>
 
       {/* seat distributions */}
       <div>
         <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-slate-400">
-          Seat distributions (P<sub>10</sub> / P<sub>50</sub> / P<sub>90</sub>)
+          {t.mcPanel.seatDist}
         </h3>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
           {SPECTRUM_ORDER.map((p) => (
@@ -123,7 +125,7 @@ export function MonteCarloPanel({ mc }: { mc: MonteCarloResult }) {
         {/* threshold mortality */}
         <div>
           <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-slate-400">
-            Threshold mortality risk
+            {t.mcPanel.mortality}
           </h3>
           <div className="h-56 rounded-lg border border-slate-800 bg-slate-900/40 p-2">
             <ResponsiveContainer width="100%" height="100%">
@@ -163,11 +165,11 @@ export function MonteCarloPanel({ mc }: { mc: MonteCarloResult }) {
           <div className="mt-1 flex gap-4 text-[10px] text-slate-500">
             <span>
               <i className="mr-1 inline-block h-2 w-2 rounded-sm" style={{ background: "#e30613" }} />
-              P(Sₖ = 0) — zero seats
+              {t.mcPanel.legendZero}
             </span>
             <span>
               <i className="mr-1 inline-block h-2 w-2 rounded-sm" style={{ background: "#f59e0b" }} />
-              P(Cₖ &lt; threshold) — national gate
+              {t.mcPanel.legendThr}
             </span>
           </div>
         </div>
@@ -175,7 +177,7 @@ export function MonteCarloPanel({ mc }: { mc: MonteCarloResult }) {
         {/* coalition probabilities */}
         <div>
           <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-slate-400">
-            Coalition majority probabilities P(C ≥ 231)
+            {t.mcPanel.coalTitle}
           </h3>
           <div className="h-56 rounded-lg border border-slate-800 bg-slate-900/40 p-2">
             <ResponsiveContainer width="100%" height="100%">
@@ -219,11 +221,11 @@ export function MonteCarloPanel({ mc }: { mc: MonteCarloResult }) {
           <div className="mt-1 flex gap-4 text-[10px] text-slate-500">
             <span>
               <i className="mr-1 inline-block h-2 w-2 rounded-sm" style={{ background: "#4a90e2" }} />
-              P(≥231) governing
+              {t.mcPanel.legendMaj}
             </span>
             <span>
               <i className="mr-1 inline-block h-2 w-2 rounded-sm" style={{ background: "#2e9e4f" }} />
-              P(≥276) constitutional
+              {t.mcPanel.legendCon}
             </span>
           </div>
         </div>

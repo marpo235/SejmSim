@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import mapJson from "@/data/map.json";
 import { PARTIES, type PartyId } from "@/data/parties";
 import type { DistrictResult } from "@/engine/types";
+import { useT } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 export const MAP_ID = "sejmsim-map";
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export function PolandMap({ districts, selected, onSelect }: Props) {
+  const t = useT();
   const [hovered, setHovered] = useState<number | null>(null);
 
   const winner = useMemo(() => {
@@ -74,10 +76,10 @@ export function PolandMap({ districts, selected, onSelect }: Props) {
       {hoveredDistrict && (
         <div className="pointer-events-none absolute top-2 left-2 rounded-md border border-slate-700 bg-slate-900/95 px-3 py-2 text-xs shadow-lg">
           <div className="font-semibold text-slate-100">
-            Okręg {hoveredDistrict.id} — {hoveredDistrict.name}
+            {t.map.district(hoveredDistrict.id)} — {hoveredDistrict.name}
           </div>
           <div className="num text-slate-400">
-            {hoveredDistrict.seats} seats · winner:{" "}
+            {hoveredDistrict.seats} {t.map.seatsUnit} · {t.map.winner}:{" "}
             {winner.get(hoveredDistrict.id)
               ? PARTIES[winner.get(hoveredDistrict.id)!].name
               : "—"}

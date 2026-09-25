@@ -1,5 +1,6 @@
 import { PARTIES, PARTY_IDS, type PartyId } from "@/data/parties";
 import type { MonteCarloResult } from "@/engine/types";
+import { useT } from "@/lib/i18n";
 import { cn, fmtPct } from "@/lib/utils";
 import { Badge } from "./ui/primitives";
 
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export function CoalitionBuilder({ seats, selected, onToggle, mc }: Props) {
+  const t = useT();
   const total = selected.reduce((a, p) => a + (seats[p] ?? 0), 0);
   const pct = Math.min(100, (total / 460) * 100);
   const majority = total >= 231;
@@ -21,10 +23,10 @@ export function CoalitionBuilder({ seats, selected, onToggle, mc }: Props) {
     <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-3">
       <div className="mb-2 flex items-center justify-between">
         <h2 className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">
-          Coalition builder
+          {t.coalition.title}
         </h2>
         <span className="num text-xs text-slate-500">
-          {selected.length ? `${total} / 460 seats` : "select committees"}
+          {selected.length ? t.coalition.seats(total) : t.coalition.select}
         </span>
       </div>
       <div className="mb-3 flex flex-wrap gap-1.5">
@@ -81,10 +83,10 @@ export function CoalitionBuilder({ seats, selected, onToggle, mc }: Props) {
           {selected.length === 0
             ? "—"
             : constitutional
-              ? "CONSTITUTIONAL MAJORITY"
+              ? t.coalition.constMaj
               : majority
-                ? "GOVERNING MAJORITY"
-                : `${231 - total} seats short`}
+                ? t.coalition.govMaj
+                : t.coalition.short(231 - total)}
         </span>
         {prob && (
           <span className="num text-slate-400">
@@ -96,7 +98,7 @@ export function CoalitionBuilder({ seats, selected, onToggle, mc }: Props) {
         )}
       </div>
       {!prob && selected.length > 0 && mc == null && (
-        <div className="mt-1 text-[10px] text-slate-600">Run MC to get coalition probabilities</div>
+        <div className="mt-1 text-[10px] text-slate-600">{t.coalition.runMc}</div>
       )}
     </div>
   );

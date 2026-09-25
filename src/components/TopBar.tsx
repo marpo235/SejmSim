@@ -2,6 +2,8 @@ import { useState } from "react";
 import { PRESETS } from "@/data/parties";
 import type { DeterministicResult } from "@/engine/types";
 import { exportCsv, exportSvgAsPng } from "@/lib/exporters";
+import { useT, type Lang } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 import { HEMICYCLE_ID } from "./Hemicycle";
 import { MAP_ID } from "./PolandMap";
 import { MethodologyModal } from "./MethodologyModal";
@@ -11,9 +13,12 @@ import { BookOpenText, Check, ChevronDown, Download, Share2 } from "lucide-react
 interface Props {
   onPreset: (name: string) => void;
   det: DeterministicResult | null;
+  lang: Lang;
+  onLang: (l: Lang) => void;
 }
 
-export function TopBar({ onPreset, det }: Props) {
+export function TopBar({ onPreset, det, lang, onLang }: Props) {
+  const t = useT();
   const [methodOpen, setMethodOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -44,12 +49,10 @@ export function TopBar({ onPreset, det }: Props) {
             <div className="text-sm font-bold tracking-tight text-slate-50">
               SejmSim <span className="text-amber-500">2027</span>
               <span className="num ml-2 hidden text-[10px] font-normal text-slate-500 sm:inline">
-                // 41-District Projection Engine
+                // {lang === "pl" ? "Symulator Wyborczy Sejmu" : "41-District Projection Engine"}
               </span>
             </div>
-            <div className="text-[10px] text-slate-500">
-              probabilistic 460-seat allocation · fully client-side
-            </div>
+            <div className="text-[10px] text-slate-500">{t.topbar.subtitle}</div>
           </div>
         </div>
 
@@ -64,11 +67,11 @@ export function TopBar({ onPreset, det }: Props) {
             aria-label="Scenario presets"
           >
             <option value="" disabled>
-              Presets…
+              {t.topbar.presets}
             </option>
             {PRESETS.map((p) => (
               <option key={p.name} value={p.name}>
-                {p.name}
+                {t.presetNames[p.name] ?? p.name}
               </option>
             ))}
           </select>
@@ -76,7 +79,7 @@ export function TopBar({ onPreset, det }: Props) {
           <details className="group relative">
             <summary className="flex h-8 cursor-pointer list-none items-center gap-1 rounded-md border border-slate-700 bg-slate-900 px-2.5 text-xs text-slate-200 hover:bg-slate-800 [&::-webkit-details-marker]:hidden">
               <Download size={13} />
-              Export
+              {t.topbar.export}
               <ChevronDown size={11} className="transition-transform group-open:rotate-180" />
             </summary>
             <div className="absolute right-0 top-9 z-40 w-44 overflow-hidden rounded-md border border-slate-700 bg-slate-900 shadow-xl">
@@ -84,31 +87,50 @@ export function TopBar({ onPreset, det }: Props) {
                 className="block w-full px-3 py-2 text-left text-xs text-slate-200 hover:bg-slate-800 cursor-pointer"
                 onClick={() => exportSvgAsPng(HEMICYCLE_ID, "sejmsim-hemicycle.png")}
               >
-                Hemicycle PNG
+                {t.topbar.exportHemi}
               </button>
               <button
                 className="block w-full px-3 py-2 text-left text-xs text-slate-200 hover:bg-slate-800 cursor-pointer"
                 onClick={() => exportSvgAsPng(MAP_ID, "sejmsim-map.png")}
               >
-                District map PNG
+                {t.topbar.exportMap}
               </button>
               <button
                 className="block w-full px-3 py-2 text-left text-xs text-slate-200 hover:bg-slate-800 cursor-pointer"
                 onClick={() => det && exportCsv(det, "sejmsim-results.csv")}
               >
-                Results CSV
+                {t.topbar.exportCsv}
               </button>
             </div>
           </details>
 
           <Button variant="outline" size="sm" onClick={share} className="h-8">
             {copied ? <Check size={13} className="text-emerald-400" /> : <Share2 size={13} />}
-            {copied ? "Copied!" : "Share URL"}
+            {copied ? t.topbar.copied : t.topbar.share}
           </Button>
           <Button variant="ghost" size="sm" onClick={() => setMethodOpen(true)} className="h-8">
             <BookOpenText size={13} />
-            Methodology
+            {t.topbar.methodology}
           </Button>
+
+          {/* language toggle */}
+          <div className="ml-1 flex rounded-md border border-slate-700 bg-slate-900 p-0.5">
+            {(["pl", "en"] as Lang[]).map((l) => (
+              <button
+                key={l}
+                onClick={() => onLang(l)}
+                aria-pressed={lang === l}
+                className={cn(
+                  "num cursor-pointer rounded px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider transition-colors",
+                  lang === l
+                    ? "bg-amber-500 text-slate-950"
+                    : "text-slate-400 hover:text-slate-200"
+                )}
+              >
+                {l}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
       <MethodologyModal open={methodOpen} onOpenChange={setMethodOpen} />

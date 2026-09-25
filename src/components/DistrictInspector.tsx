@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { PARTIES } from "@/data/parties";
 import type { DistrictResult } from "@/engine/types";
+import { useT } from "@/lib/i18n";
 import { fmtInt, fmtPct, cn } from "@/lib/utils";
 import { Badge, Collapsible, CollapsibleContent, CollapsibleTrigger } from "./ui/primitives";
 import { ChevronDown, X, AlertTriangle } from "lucide-react";
@@ -11,11 +12,12 @@ interface Props {
 }
 
 export function DistrictInspector({ district, onClose }: Props) {
+  const t = useT();
   const [auditOpen, setAuditOpen] = useState(false);
   if (!district) {
     return (
       <div className="flex h-full min-h-[200px] items-center justify-center rounded-xl border border-dashed border-slate-800 text-sm text-slate-500">
-        Click a district on the map to inspect it
+        {t.inspector.placeholder}
       </div>
     );
   }
@@ -29,18 +31,21 @@ export function DistrictInspector({ district, onClose }: Props) {
       <div className="flex items-start justify-between px-4 pt-3">
         <div>
           <div className="text-xs uppercase tracking-widest text-slate-500">
-            Okręg wyborczy nr {district.id}
+            {t.inspector.districtNo(district.id)}
           </div>
           <div className="text-lg font-bold text-slate-100">{district.name}</div>
           <div className="num text-xs text-slate-400">
-            M<sub>d</sub> = {district.seats} seats · q* = {district.qStar.toFixed(4)} ·{" "}
-            {fmtInt(district.totalVotes)} votes (2023)
+            {t.inspector.seatsInfo(
+              district.seats,
+              district.qStar.toFixed(4),
+              fmtInt(district.totalVotes)
+            )}
           </div>
         </div>
         <button
           onClick={onClose}
           className="rounded p-1 text-slate-500 hover:bg-slate-800 hover:text-slate-300 cursor-pointer"
-          aria-label="Close inspector"
+          aria-label={t.inspector.close}
         >
           <X size={16} />
         </button>
@@ -50,7 +55,7 @@ export function DistrictInspector({ district, onClose }: Props) {
         {/* vote shares */}
         <div>
           <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-            Projected local vote share V<sub>k,d</sub>
+            {t.inspector.voteShare}
           </div>
           <div className="space-y-1">
             {sortedVotes.map((v) => (
@@ -81,14 +86,14 @@ export function DistrictInspector({ district, onClose }: Props) {
             ))}
           </div>
           <div className="mt-1 text-[10px] text-slate-500">
-            Shares renormalized over qualifying lists · right column = seats
+            {t.inspector.voteShareNote}
           </div>
         </div>
 
         {/* winners + flip */}
         <div>
           <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-            Mandates
+            {t.inspector.mandates}
           </div>
           <div className="mb-3 flex flex-wrap gap-1.5">
             {winners.map((v) => (
@@ -102,22 +107,29 @@ export function DistrictInspector({ district, onClose }: Props) {
             <div className="rounded-lg border border-amber-900/50 bg-amber-950/30 p-2.5 text-xs">
               <div className="mb-1 flex items-center gap-1.5 font-semibold text-amber-300">
                 <AlertTriangle size={13} />
-                Vote-flip diagnostic ΔV
+                {t.inspector.flipTitle}
               </div>
               <div className="num leading-relaxed text-amber-100/90">
                 <span style={{ color: PARTIES[topFlip.party].color }} className="font-bold">
                   {PARTIES[topFlip.party].short}
                 </span>{" "}
-                needs +{(topFlip.deltaShare * 100).toFixed(2)}% (≈+
-                {fmtInt(topFlip.deltaVotes)} votes) to flip seat #{topFlip.seatNumber} from{" "}
+                {t.inspector.flipTextBefore}
+                {(topFlip.deltaShare * 100).toFixed(2)}
+                {t.inspector.flipTextMid}
+                {fmtInt(topFlip.deltaVotes)}
+                {t.inspector.flipTextMid2}
+                {topFlip.seatNumber}
+                {t.inspector.flipTextMid3}
                 <span style={{ color: PARTIES[topFlip.fromParty].color }} className="font-bold">
                   {PARTIES[topFlip.fromParty].short}
                 </span>
               </div>
               {district.flips[1] && (
                 <div className="num mt-1 text-[10px] text-amber-200/60">
-                  next: {PARTIES[district.flips[1].party].short} +
-                  {(district.flips[1].deltaShare * 100).toFixed(2)}%
+                  {t.inspector.flipNext(
+                    PARTIES[district.flips[1].party].short,
+                    (district.flips[1].deltaShare * 100).toFixed(2)
+                  )}
                 </div>
               )}
             </div>
@@ -128,7 +140,7 @@ export function DistrictInspector({ district, onClose }: Props) {
       {/* quotient audit */}
       <Collapsible open={auditOpen} onOpenChange={setAuditOpen}>
         <CollapsibleTrigger className="flex w-full cursor-pointer items-center justify-between border-t border-slate-800 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500 hover:text-slate-300">
-          Quotient audit — V<sub>k,d</sub>/m matrix
+          {t.inspector.auditTitle}
           <ChevronDown size={14} className={cn("transition-transform", auditOpen && "rotate-180")} />
         </CollapsibleTrigger>
         <CollapsibleContent>
@@ -136,10 +148,10 @@ export function DistrictInspector({ district, onClose }: Props) {
             <table className="num w-full text-[11px]">
               <thead>
                 <tr className="text-left text-slate-500">
-                  <th className="py-1 pr-3">quotient</th>
-                  <th className="py-1 pr-3">party</th>
+                  <th className="py-1 pr-3">{t.inspector.thRank}</th>
+                  <th className="py-1 pr-3">{t.inspector.thParty}</th>
                   <th className="py-1 pr-3">V/m</th>
-                  <th className="py-1">seat</th>
+                  <th className="py-1">{t.inspector.thSeat}</th>
                 </tr>
               </thead>
               <tbody>

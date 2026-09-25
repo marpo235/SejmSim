@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PRESETS, type PartyId, type Scenario } from "@/data/parties";
 import { applyShares } from "@/lib/scenario";
 import { decodeState, encodeState, type AppState } from "@/lib/urlState";
+import { DICTS, LangContext, type Lang } from "@/lib/i18n";
 import { deterministic, runMonteCarloAsync, type McHandle } from "@/engine/client";
 import type { DeterministicResult, MonteCarloResult } from "@/engine/types";
 import { CoalitionBuilder } from "@/components/CoalitionBuilder";
@@ -15,12 +16,21 @@ import { TopBar } from "@/components/TopBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/primitives";
 import { Loader2 } from "lucide-react";
 
+const LS_LANG = "sejmsim.lang";
+
 function initialState(): AppState {
+  let s: AppState;
   try {
-    return decodeState(window.location.search);
+    s = decodeState(window.location.search);
   } catch {
-    return decodeState("");
+    s = decodeState("");
   }
+  // language precedence: explicit ?lang= param > localStorage > default "pl"
+  if (!/[?&]lang=/.test(window.location.search)) {
+    const saved = localStorage.getItem(LS_LANG);
+    if (saved === "pl" || saved === "en") s.lang = saved;
+  }
+  return s;
 }
 
 export default function App() {
@@ -29,7 +39,8 @@ export default function App() {
   const [mcProgress, setMcProgress] = useState<{ done: number; total: number } | null>(null);
   const mcHandle = useRef<McHandle | null>(null);
 
-  const { scenario, coalition, district, tab } = state;
+  const { scenario, coalition, district, tab, lang } = state;
+  const t = DICTS[lang];
 
   // deterministic pass — instant, on every change
   const det: DeterministicResult = useMemo(() => deterministic(scenario), [scenario]);
@@ -55,15 +66,20 @@ export default function App() {
 
   useEffect(() => () => mcHandle.current?.cancel(), []);
 
+  // persist language choice
+  useEffect(() => {
+    localStorage.setItem(LS_LANG, lang);
+  }, [lang]);
+
   // URL state sync
   useEffect(() => {
     const t = setTimeout(() => {
-      const q = encodeState({ scenario, coalition, district, tab });
+      const q = encodeState({ scenario, coalition, district, tab, lang });
       const url = q ? `${location.pathname}${q}` : location.pathname;
       window.history.replaceState(null, "", url);
     }, 150);
     return () => clearTimeout(t);
-  }, [scenario, coalition, district, tab]);
+  }, [scenario, coalition, district, tab, lang]);
 
   const patch = useCallback(
     (p: Partial<AppState>) => setState((s) => ({ ...s, ...p })),
@@ -87,13 +103,16 @@ export default function App() {
     [patch, coalition]
   );
 
+  const onLang = useCallback((l: Lang) => patch({ lang: l }), [patch]);
+
   const selectedDistrict = det.districts.find((d) => d.id === district) ?? null;
   const coalitionSeats = coalition.reduce((a, p) => a + det.seats[p], 0);
   const running = mcProgress != null;
 
   return (
+    <LangContext.Provider value={lang}>
     <div className="min-h-screen bg-slate-950 text-slate-200">
-      <TopBar onPreset={onPreset} det={det} />
+      <TopBar onPreset={onPreset} det={det} lang={lang} onLang={onLang} />
 
       {/* progress hairline */}
       <div className="h-0.5 w-full bg-transparent">
@@ -114,18 +133,20 @@ export default function App() {
           <section className="relative rounded-xl border border-slate-800 bg-slate-900/60 p-4">
             <div className="flex items-center justify-between">
               <h2 className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">
-                Sejm — 460 seats
+                {t.main.sejmTitle}
               </h2>
               <span className="num flex items-center gap-1.5 text-[11px] text-slate-500">
                 {running && (
                   <>
                     <Loader2 size={11} className="animate-spin text-amber-500" />
-                    sampling {mcProgress!.done.toLocaleString()}/
-                    {mcProgress!.total.toLocaleString()}
+                    {t.main.sampling(
+                      mcProgress!.done.toLocaleString(),
+                      mcProgress!.total.toLocaleString()
+                    )}
                   </>
                 )}
                 {!running && mc && (
-                  <>{mc.iterations.toLocaleString()} MC runs · {mc.elapsedMs.toFixed(0)} ms</>
+                  <>{t.main.mcRuns(mc.iterations.toLocaleString(), mc.elapsedMs.toFixed(0))}</>
                 )}
               </span>
             </div>
@@ -141,12 +162,14 @@ export default function App() {
                   <>
                     <div className="num text-3xl font-bold text-slate-50">{coalitionSeats}</div>
                     <div className="text-[10px] uppercase tracking-widest text-slate-500">
-                      coalition of {coalition.length} ·{" "}
-                      {coalitionSeats >= 276
-                        ? "constitutional"
-                        : coalitionSeats >= 231
-                          ? "majority"
-                          : "minority"}
+                      {t.main.coalitionOf(
+                        coalition.length,
+                        coalitionSeats >= 276
+                          ? t.main.constitutional
+                          : coalitionSeats >= 231
+                            ? t.main.majority
+                            : t.main.minority
+                      )}
                     </div>
                   </>
                 ) : (
@@ -155,7 +178,7 @@ export default function App() {
                       {Object.entries(det.seats).sort((a, b) => b[1] - a[1])[0]?.[1] ?? 0}
                     </div>
                     <div className="text-[10px] uppercase tracking-widest text-slate-500">
-                      largest committee
+                      {t.main.largest}
                     </div>
                   </>
                 )}
@@ -173,8 +196,8 @@ export default function App() {
           <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
             <Tabs value={tab} onValueChange={(v) => patch({ tab: v as "det" | "mc" })}>
               <TabsList>
-                <TabsTrigger value="det">Deterministic district allocation</TabsTrigger>
-                <TabsTrigger value="mc">Monte Carlo probabilities</TabsTrigger>
+                <TabsTrigger value="det">{t.tabs.det}</TabsTrigger>
+                <TabsTrigger value="mc">{t.tabs.mc}</TabsTrigger>
               </TabsList>
               <TabsContent value="det" className="mt-3">
                 <DeterministicPanel det={det} />
@@ -185,7 +208,7 @@ export default function App() {
                 ) : (
                   <div className="flex h-40 items-center justify-center text-sm text-slate-500">
                     <Loader2 size={15} className="mr-2 animate-spin" />
-                    running simulation…
+                    {t.mcPanel.loading}
                   </div>
                 )}
               </TabsContent>
@@ -197,7 +220,7 @@ export default function App() {
         <div className="min-w-0 space-y-3">
           <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-3">
             <h2 className="mb-1 text-[11px] font-semibold uppercase tracking-widest text-slate-400">
-              41 electoral districts
+              {t.map.title}
             </h2>
             <PolandMap
               districts={det.districts}
@@ -213,10 +236,9 @@ export default function App() {
       </main>
 
       <footer className="mx-auto max-w-[1600px] px-3 pb-6 pt-2 text-[10px] leading-relaxed text-slate-600">
-        SejmSim 2027 — exploratory projection tool, not a forecast. District magnitudes, 2023 Sejm
-        and 2025 presidential results: official PKW data. Map geometry adapted from MIT-licensed
-        work (github.com/Dyzio18/2023wybory.pl). Computed locally in your browser.
+        {t.footer}
       </footer>
     </div>
+    </LangContext.Provider>
   );
 }

@@ -1,33 +1,31 @@
 import { PARTIES, SPECTRUM_ORDER } from "@/data/parties";
 import type { DeterministicResult } from "@/engine/types";
+import { useT } from "@/lib/i18n";
 import { cn, fmtPct, fmtSigned } from "@/lib/utils";
 import { Badge } from "./ui/primitives";
 
 export function DeterministicPanel({ det }: { det: DeterministicResult }) {
+  const t = useT();
   const totalSeats = SPECTRUM_ORDER.reduce((a, p) => a + det.seats[p], 0);
+  const gatedNames = det.gatedNationally.map((p) => PARTIES[p].short).join(", ");
   return (
     <div>
       <div className="num mb-2 text-[11px] text-slate-500">
-        Single-run allocation at mean shares · {totalSeats}/460 seats assigned
-        {det.gatedNationally.length > 0 && (
-          <>
-            {" "}
-            · gated nationally:{" "}
-            {det.gatedNationally.map((p) => PARTIES[p].short).join(", ")}
-          </>
-        )}
+        {t.detPanel
+          .subtitle(det.gatedNationally.length > 0 ? t.detPanel.gated(gatedNames) : "")
+          .replace("{SEATS}", String(totalSeats))}
       </div>
       <div className="overflow-x-auto rounded-lg border border-slate-800">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-800 bg-slate-900/80 text-left text-[10px] uppercase tracking-wider text-slate-500">
-              <th className="px-3 py-2">Committee</th>
-              <th className="px-3 py-2 text-right">Nat. share</th>
-              <th className="px-3 py-2 text-center">Gate</th>
-              <th className="px-3 py-2 text-right">Seats (41-district)</th>
-              <th className="px-3 py-2 text-right">Dry national</th>
-              <th className="px-3 py-2 text-right">Δ vs dry</th>
-              <th className="px-3 py-2 w-1/3">Seat bar</th>
+              <th className="px-3 py-2">{t.detPanel.thCommittee}</th>
+              <th className="px-3 py-2 text-right">{t.detPanel.thShare}</th>
+              <th className="px-3 py-2 text-center">{t.detPanel.thGate}</th>
+              <th className="px-3 py-2 text-right">{t.detPanel.thSeats}</th>
+              <th className="px-3 py-2 text-right">{t.detPanel.thDry}</th>
+              <th className="px-3 py-2 text-right">{t.detPanel.thDelta}</th>
+              <th className="px-3 py-2 w-1/3">{t.detPanel.thBar}</th>
             </tr>
           </thead>
           <tbody>
@@ -48,9 +46,9 @@ export function DeterministicPanel({ det }: { det: DeterministicResult }) {
                   </td>
                   <td className="px-3 py-1.5 text-center">
                     {gated ? (
-                      <Badge variant="danger">OUT</Badge>
+                      <Badge variant="danger">{t.detPanel.outSejm}</Badge>
                     ) : (
-                      <Badge variant="ok">IN</Badge>
+                      <Badge variant="ok">{t.detPanel.inSejm}</Badge>
                     )}
                   </td>
                   <td className={cn("num px-3 py-1.5 text-right text-base font-bold", s > 0 ? "text-slate-50" : "text-slate-600")}>
@@ -82,11 +80,7 @@ export function DeterministicPanel({ det }: { det: DeterministicResult }) {
           </tbody>
         </table>
       </div>
-      <div className="mt-2 text-[10px] text-slate-600">
-        "Dry national" = naive single-constituency D'Hondt over 460 seats on qualified national
-        shares — the baseline used by typical web simulators. Δ shows the disaggregation effect
-        of allocating inside 41 real districts.
-      </div>
+      <div className="mt-2 text-[10px] text-slate-600">{t.detPanel.footnote}</div>
     </div>
   );
 }

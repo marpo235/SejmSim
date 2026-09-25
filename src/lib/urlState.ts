@@ -5,6 +5,7 @@ import {
   type PartyId,
   type Scenario,
 } from "@/data/parties";
+import type { Lang } from "./i18n";
 
 /** Serialize the full scenario + view state into a compact query string. */
 export interface AppState {
@@ -12,6 +13,7 @@ export interface AppState {
   coalition: PartyId[];
   district: number | null;
   tab: "det" | "mc";
+  lang: Lang;
 }
 
 export function encodeState(s: AppState): string {
@@ -36,6 +38,7 @@ export function encodeState(s: AppState): string {
   if (s.coalition.length) p.set("coal", s.coalition.join(",").toLowerCase());
   if (s.district != null) p.set("d", String(s.district));
   if (s.tab !== "det") p.set("t", s.tab);
+  p.set("lang", s.lang);
   const q = p.toString();
   return q ? `?${q}` : "";
 }
@@ -100,5 +103,6 @@ export function decodeState(search: string): AppState {
   const d = parseInt(p.get("d") ?? "", 10);
   const district = Number.isFinite(d) && d >= 1 && d <= 41 ? d : null;
   const tab = p.get("t") === "mc" ? "mc" : "det";
-  return { scenario: s, coalition, district, tab };
+  const lang: Lang = p.get("lang") === "en" ? "en" : "pl";
+  return { scenario: s, coalition, district, tab, lang };
 }
