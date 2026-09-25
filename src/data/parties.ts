@@ -124,7 +124,7 @@ export const PARTIES: Record<PartyId, PartyDef> = {
     name: "Konfederacja",
     short: "Konf",
     color: "#4a7ba6",
-    coalition: true,
+    coalition: false,
     spectrum: 7,
     prior23: "KONF",
     prior25: "MENTZEN",

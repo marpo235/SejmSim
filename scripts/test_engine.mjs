@@ -7,12 +7,12 @@ const workerFile = readdirSync(assets).find((f) => f.startsWith("worker-") && f.
 if (!workerFile) throw new Error("worker bundle not found — run `npm run build` first");
 
 const scenario = {
-  shares: { RAZ: 3.8, LEW: 5.8, KO: 30.5, RP: 5.5, P2050: 0.8, PSL: 2.6, PIS: 21.5, KONF: 17.5, KKP: 11.5 },
+  shares: { RAZ: 3.8, LEW: 5.8, KO: 30.5, RP: 5.5, P2050: 0.8, PSL: 2.6, PIS: 21.5, KONF: 6.2, KKP: 11.5 },
   autoNormalize: true,
   alpha: { RAZ: 1, LEW: 1, KO: 1, RP: 0, P2050: 1, PSL: 1, PIS: 1, KONF: 1, KKP: 1 },
   w25: 0.75,
   sigma: 0.08,
-  coalitionFlag: { RAZ: false, LEW: false, KO: true, RP: false, P2050: false, PSL: false, PIS: false, KONF: true, KKP: false },
+  coalitionFlag: { RAZ: false, LEW: false, KO: true, RP: false, P2050: false, PSL: false, PIS: false, KONF: false, KKP: false },
   iterations: 10000,
 };
 
