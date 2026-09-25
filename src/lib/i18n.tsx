@@ -37,13 +37,15 @@ const pl = {
     threshold: "PRÓG",
   },
   presetNames: {
-    "Pałade Baseline": "Bazowy Pałady",
+    "Marcin Palade Baseline": "Bazowy wg Marcina Pałade",
+    "ewybory.eu Average": "Bazowy wg ewybory.eu",
     "Bipolar Maximum": "Maksimum Bipolarne",
     "Right-Wing Majority": "Większość Prawicy",
     "Tusk Megalist": "Super-lista Tuska",
   } as Record<string, string>,
   presetDescs: {
-    "Pałade Baseline": "Rozdrobniony wzrost prawicy; Lewica i R+ tuż nad progiem.",
+    "Marcin Palade Baseline": "Rozdrobniony wzrost prawicy; Lewica i R+ tuż nad progiem.",
+    "ewybory.eu Average": "Średnia publicznych sondaży wg ewybory.eu.",
     "Bipolar Maximum": "Konsolidacja dwóch bloków; R+ ginie pod progiem.",
     "Right-Wing Majority": "Ścieżka większości PiS + Konfederacja + KKP.",
     "Tusk Megalist": "KO wchłania PSL i P2050 w jedną wspólną listę.",

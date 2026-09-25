@@ -69,7 +69,7 @@ export function Sidebar({ scenario, onChange, onPreset }: Props) {
               key={pr.name}
               onClick={() => onPreset(pr.name)}
               title={t.presetDescs[pr.name] ?? pr.description}
-              className="rounded-md border border-slate-700/80 bg-slate-800/60 px-2 py-1.5 text-left text-[11px] font-medium text-slate-200 transition-colors hover:border-amber-500/50 hover:bg-slate-800 cursor-pointer"
+              className="rounded-md border border-slate-700/80 bg-slate-800/60 px-2 py-1.5 text-left text-[11px] font-medium leading-snug text-slate-200 transition-colors hover:border-amber-500/50 hover:bg-slate-800 cursor-pointer"
             >
               {t.presetNames[pr.name] ?? pr.name}
             </button>

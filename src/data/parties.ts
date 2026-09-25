@@ -164,15 +164,15 @@ export interface Scenario {
 }
 
 export const DEFAULT_SHARES: Record<PartyId, number> = {
-  KO: 30.5,
-  PIS: 21.5,
-  KONF: 17.5,
-  KKP: 11.5,
-  LEW: 5.8,
+  KO: 31.0,
+  PIS: 21.0,
+  KONF: 17.0,
+  KKP: 12.0,
+  LEW: 6.0,
   RP: 5.5,
   RAZ: 3.8,
   PSL: 2.6,
-  P2050: 0.8,
+  P2050: 1.0,
 };
 
 export function defaultScenario(): Scenario {
@@ -201,18 +201,33 @@ export interface Preset {
 
 export const PRESETS: Preset[] = [
   {
-    name: "Pałade Baseline",
+    name: "Marcin Palade Baseline",
     description: "Fragmented right surge; Lewica and R+ barely over the line.",
     shares: {
-      KO: 30.5,
-      PIS: 21.5,
-      KONF: 17.5,
-      KKP: 11.5,
-      LEW: 5.8,
+      KO: 31.0,
+      PIS: 21.0,
+      KONF: 17.0,
+      KKP: 12.0,
+      LEW: 6.0,
       RP: 5.5,
       RAZ: 3.8,
       PSL: 2.6,
-      P2050: 0.8,
+      P2050: 1.0,
+    },
+  },
+  {
+    name: "ewybory.eu Average",
+    description: "Public polling average baseline from ewybory.eu.",
+    shares: {
+      KO: 30.8,
+      PIS: 19.1,
+      KONF: 13.5,
+      KKP: 8.4,
+      LEW: 7.2,
+      RP: 5.1,
+      RAZ: 3.8,
+      PSL: 3.0,
+      P2050: 2.5,
     },
   },
   {
