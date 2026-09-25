@@ -37,7 +37,7 @@ const pl = {
     threshold: "PRÓG",
   },
   presetNames: {
-    "Marcin Palade Baseline": "Bazowy wg Marcina Pałade",
+    "Marcin Palade Baseline": "Bazowy wg Marcina Palade",
     "ewybory.eu Average": "Bazowy wg ewybory.eu",
     "Bipolar Maximum": "Maksimum Bipolarne",
     "Right-Wing Majority": "Większość Prawicy",
