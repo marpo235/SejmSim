@@ -14,81 +14,144 @@ export function MethodologyModal({
         <DialogPrimitive.Overlay className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm" />
         <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[85vh] w-[min(720px,92vw)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-xl border border-slate-700 bg-slate-900 p-6 shadow-2xl focus:outline-none">
           <div className="mb-4 flex items-start justify-between">
-            <div>
-              <DialogPrimitive.Title className="text-lg font-bold text-slate-100">
-                Mathematical methodology
-              </DialogPrimitive.Title>
-              <DialogPrimitive.Description className="text-xs text-slate-500">
-                Six-stage disaggregated D'Hondt engine — runs entirely in your browser via a Web Worker.
-              </DialogPrimitive.Description>
-            </div>
+            <DialogPrimitive.Title className="text-lg font-bold text-slate-100">
+              Metodologia Modelu SejmSim 2027
+            </DialogPrimitive.Title>
             <DialogPrimitive.Close className="rounded p-1 text-slate-500 hover:bg-slate-800 hover:text-slate-300 cursor-pointer">
               <X size={18} />
             </DialogPrimitive.Close>
           </div>
+          <DialogPrimitive.Description className="sr-only">
+            Przegląd metodologii silnika projekcyjnego SejmSim 2027
+          </DialogPrimitive.Description>
 
-          <div className="space-y-4 text-sm leading-relaxed text-slate-300">
-            <Stage n={1} title="Logit-normal polling sampler">
-              National vectors are drawn in log-ratio space. With the residual
-              "others" bucket as reference (Z=0):
-              <Formula>{"Zₖ ~ N(μₖ, Σ),  μₖ = ln(C̄ₖ / C̄_ref),  C = softmax(Z)"}</Formula>
-              Σ combines independent poll error σ (configurable) with an
-              equicorrelated common shock (ρ = 0.25), so correlated polling
-              misses are represented. Every draw satisfies ΣCₖ = 1.
-            </Stage>
+          <div className="space-y-5 text-sm leading-relaxed text-slate-300">
+            <section>
+              <h3 className="mb-1.5 text-[14px] font-semibold text-slate-100">
+                Dlaczego standardowe symulatory się mylą?
+              </h3>
+              <p className="text-slate-400">
+                Większość kalkulatorów wyborczych przelicza poparcie krajowe na mandaty za
+                pomocą jednego, ogólnopolskiego wzoru D'Hondta. W polskim systemie
+                wyborczym jest to błąd – wybory do Sejmu nie odbywają się w jednym okręgu,
+                lecz w <b className="text-slate-200">41 odrębnych okręgach wyborczych</b> o
+                wielkości od 7 do 20 mandatów.
+              </p>
+              <p className="mt-2 text-slate-400">
+                Model <b className="text-slate-200">SejmSim 2027</b> eliminuje ten błąd,
+                wykonując pełną dysagregację poparcia krajowego do poziomu poszczególnych
+                okręgów przed obliczeniem ilorazów D'Hondta.
+              </p>
+            </section>
 
-            <Stage n={2} title="Prior construction g(k,d)">
-              Smoothed geographic shapes from official PKW matrices — the 2023
-              Sejm per-district results and the 2025 presidential first round
-              (32k precincts re-aggregated into the 41 sejm districts):
-              <Formula>{"gₖ,𝒹 ∝ w₂₅·s²⁵ₖ,𝒹 + (1−w₂₅)·s²³ₖ,𝒹 + ε_Laplace"}</Formula>
-              Candidate→committee mapping: Trzaskowski→KO, Nawrocki+Jakubiak→PiS,
-              Mentzen→Konfederacja, Braun→KKP, Zandberg→Razem, Biejat→Lewica,
-              Hołownia→PSL/P2050 (PSL fielded no candidate). Parties without a
-              historical footprint (R+) use a flat prior.
-            </Stage>
+            <hr className="border-slate-800" />
 
-            <Stage n={3} title="Disaggregation & dispersion">
-              Latent support per district combines the sampled national share
-              with the committee's geographic shape raised to a persistence
-              exponent:
-              <Formula>{"Lₖ,𝒹 = Cₖ · (gₖ,𝒹)^αₖ,   V_raw = L / ΣⱼLⱼ,𝒹"}</Formula>
-              α ∈ [0, 1.5]: 0 flattens to the national share everywhere, 1 keeps
-              the empirical shape, &gt;1 exaggerates regional concentration.
-            </Stage>
+            <section>
+              <h3 className="mb-3 text-[14px] font-semibold uppercase tracking-wider text-slate-200">
+                Kluczowe Filary Symulatora
+              </h3>
 
-            <Stage n={4} title="National gatekeeper">
-              Committees below their national threshold (5% single party, 8%
-              formal coalition) are masked to zero in every district. Their
-              votes are eliminated locally — not reallocated — replicating
-              wasted-vote mechanics:
-              <Formula>{"Cₖ < τₖ ⇒ V⁹ₖ,𝒹 = 0  ∀𝒹"}</Formula>
-            </Stage>
+              <div className="space-y-4">
+                <Pillar n={1} title="Rzeczywisty Próg Wyborczy (Krajowa Bramka)">
+                  <p>
+                    Zgodnie z Kodeksem Wyborczym, w podziale mandatów uczestniczą wyłącznie
+                    komitety, które przekroczą progi krajowe:
+                  </p>
+                  <ul className="mt-1.5 list-disc space-y-0.5 pl-5 text-slate-400">
+                    <li>
+                      <b className="text-slate-200">5%</b> dla komitetów partyjnych (np. KO,
+                      PiS, Konfederacja, Lewica, KKP).
+                    </li>
+                    <li>
+                      <b className="text-slate-200">8%</b> dla formalnych koalicji
+                      wyborczych.
+                    </li>
+                  </ul>
+                  <p className="mt-1.5">
+                    Głosy oddane na komitety, które nie przekraczają progu, są odrzucane.
+                    Model nie tworzy „centralnej puli zmarnowanych głosów” – ich eliminacja
+                    następuje lokalnie w każdym z 41 okręgów.
+                  </p>
+                </Pillar>
 
-            <Stage n={5} title="District D'Hondt">
-              Inside each of the 41 districts, quotients are generated for every
-              qualifying list and the M𝒹 seats (7–20 per district) go to the
-              highest:
-              <Formula>{"qₖ,𝒹,𝓂 = V⁹ₖ,𝒹 / m,  m ∈ {1..M𝒹}"}</Formula>
-              Non-monotonicity vs national simulators appears naturally —
-              mid-size committees stranded near thresholds lose seats to
-              geographically efficient rivals.
-            </Stage>
+                <Pillar n={2} title="Dwuetapowa Projekcja Przestrzenna (Matryca 41 Okręgów)">
+                  <p>
+                    Poparcie z sondaży krajowych jest przekładane na poparcie w okręgach na
+                    podstawie unikalnego profilu geograficznego każdego ugrupowania. Profil
+                    ten bazuje na danych przestrzennych z{" "}
+                    <b className="text-slate-200">wyborów parlamentarnych 2023</b> oraz{" "}
+                    <b className="text-slate-200">I tury wyborów prezydenckich 2025</b>.
+                  </p>
+                  <p className="mt-1.5">
+                    Pozwala to precyzyjnie odwzorować rzeczywiste bastiony i zagęszczenie
+                    elektoratów (np. wyższą efektywność ugrupowań prawicowych w okręgach
+                    wschodnich czy koncentrację Lewicy w wielkich miastach).
+                  </p>
+                </Pillar>
 
-            <Stage n={6} title="Flip diagnostics">
-              For each committee in each district, the exact additional
-              qualified share needed to capture the marginal quotient q*:
-              <Formula>{"ΔVₖ,𝒹 = (Sₖ,𝒹 + 1)·q*𝒹 − V⁹ₖ,𝒹"}</Formula>
-            </Stage>
+                <Pillar n={3} title="Parametr Geograficznej Persystencji i Dyspersji">
+                  <p>
+                    Model odróżnia ugrupowania o zakorzenionej geografii (np. KO, PiS) od
+                    ugrupowań o poparciu „płaskim” lub nowych inicjatyw bez zaplecza
+                    regionalnego. Zapobiega to sztucznemu zawyżaniu lub zaniżaniu liczby
+                    mandatów dla ugrupowań krążących wokół progu wyborczego.
+                  </p>
+                </Pillar>
 
-            <div className="rounded-lg border border-slate-800 bg-slate-950 p-3 text-xs text-slate-400">
-              <b className="text-slate-300">Data sources (official PKW):</b>{" "}
-              Sejm 2023 per-district list results; 2025 presidential R1
-              per-precinct protocols (31,628 domestic precincts re-aggregated
-              via TERYT gmina→okręg bridge); district magnitudes from PKW
-              okręgi registry. Map geometry derived from open MIT-licensed
-              district boundaries. Abroad/ship precincts are excluded (not part
-              of any sejm district).
+                <Pillar
+                  n={4}
+                  title={
+                    <>
+                      Lokalny D'Hondt i Wskaźnik Odwrócenia Mandatu (
+                      <span className="num">ΔV<sup>flip</sup></span>)
+                    </>
+                  }
+                >
+                  <p>
+                    W każdym z 41 okręgów symulator wykonuje niezależny podział mandatów
+                    metodą D'Hondta. Dodatkowo model oblicza diagnostyczny{" "}
+                    <b className="text-slate-200">
+                      wskaźnik odwrócenia mandatu (
+                      <span className="num">ΔV<sup>flip</sup></span>)
+                    </b>{" "}
+                    – pokazuje on w czasie rzeczywistym, ile punktów procentowych (i
+                    głosów) brakuje danej partii w konkretnym okręgu, aby odebrać ostatni
+                    przyznany mandat konkurentowi.
+                  </p>
+                </Pillar>
+
+                <Pillar n={5} title="Symulacja Stochastyczna Monte Carlo (10 000 Iteracji)">
+                  <p>
+                    Aby uwzględnić błąd próby sondażowej oraz przepływy między partiami,
+                    silnik przeprowadza 10 000 niezależnych losowań w tle (za pomocą Web
+                    Workerów). Daje to pełen obraz prawdopodobieństwa:
+                  </p>
+                  <ul className="mt-1.5 list-disc space-y-0.5 pl-5 text-slate-400">
+                    <li>
+                      Przedziały ufności mandatów (
+                      <span className="num">
+                        P<sub>10</sub>, P<sub>50</sub>, P<sub>90</sub>
+                      </span>
+                      ).
+                    </li>
+                    <li>
+                      Ryzyko śmiertelności progowej (prawdopodobieństwo wypadnięcia z
+                      Sejmu).
+                    </li>
+                    <li>
+                      Prawdopodobieństwo zbudowania większości rządzącej (
+                      <span className="num">≥ 231</span> mandatów).
+                    </li>
+                  </ul>
+                </Pillar>
+              </div>
+            </section>
+
+            <div className="rounded-lg border border-slate-800 bg-slate-950 p-3 text-[11px] leading-relaxed text-slate-500">
+              <b className="text-slate-400">Źródła danych:</b> oficjalne wyniki PKW — Sejm
+              2023 (wyniki list per okręg) oraz I tura prezydenckich 2025 (protokoły
+              obwodowe zagregowane do okręgów sejmowych). Obwody za granicą i na statkach
+              pominięte — nie należą do żadnego okręgu sejmowego.
             </div>
           </div>
         </DialogPrimitive.Content>
@@ -97,22 +160,22 @@ export function MethodologyModal({
   );
 }
 
-function Stage({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
+function Pillar({
+  n,
+  title,
+  children,
+}: {
+  n: number;
+  title: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
     <div>
-      <h3 className="mb-1 text-[13px] font-semibold text-slate-200">
+      <h4 className="mb-1 text-[13px] font-semibold text-slate-200">
         <span className="num mr-1.5 text-amber-500">{n}.</span>
         {title}
-      </h3>
+      </h4>
       <div className="text-[13px] text-slate-400">{children}</div>
     </div>
-  );
-}
-
-function Formula({ children }: { children: string }) {
-  return (
-    <pre className="num my-1.5 overflow-x-auto rounded-md border border-slate-800 bg-slate-950 px-3 py-1.5 text-[12px] text-emerald-300/90">
-      {children}
-    </pre>
   );
 }
