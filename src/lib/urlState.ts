@@ -14,6 +14,8 @@ export interface AppState {
   district: number | null;
   tab: "det" | "mc";
   lang: Lang;
+  /** split KONF seats into NN/RN factions in the hemicycle */
+  konfSplit: boolean;
 }
 
 export function encodeState(s: AppState): string {
@@ -38,6 +40,7 @@ export function encodeState(s: AppState): string {
   if (s.coalition.length) p.set("coal", s.coalition.join(",").toLowerCase());
   if (s.district != null) p.set("d", String(s.district));
   if (s.tab !== "det") p.set("t", s.tab);
+  if (s.konfSplit) p.set("ks", "1");
   p.set("lang", s.lang);
   const q = p.toString();
   return q ? `?${q}` : "";
@@ -104,5 +107,5 @@ export function decodeState(search: string): AppState {
   const district = Number.isFinite(d) && d >= 1 && d <= 41 ? d : null;
   const tab = p.get("t") === "mc" ? "mc" : "det";
   const lang: Lang = p.get("lang") === "en" ? "en" : "pl";
-  return { scenario: s, coalition, district, tab, lang };
+  return { scenario: s, coalition, district, tab, lang, konfSplit: p.get("ks") === "1" };
 }

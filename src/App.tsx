@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { PRESETS, type PartyId, type Scenario } from "@/data/parties";
+import { KONF_FACTIONS, PRESETS, type PartyId, type Scenario } from "@/data/parties";
 import { applyShares } from "@/lib/scenario";
+import { splitKonfederacja } from "@/lib/konfSplit";
 import { decodeState, encodeState, type AppState } from "@/lib/urlState";
 import { DICTS, LangContext, type Lang } from "@/lib/i18n";
 import { deterministic, runMonteCarloAsync, type McHandle } from "@/engine/client";
@@ -13,7 +14,7 @@ import { MonteCarloPanel } from "@/components/MonteCarloPanel";
 import { PolandMap } from "@/components/PolandMap";
 import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/primitives";
+import { Switch, Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/primitives";
 import { Loader2 } from "lucide-react";
 
 const LS_LANG = "sejmsim.lang";
@@ -39,11 +40,17 @@ export default function App() {
   const [mcProgress, setMcProgress] = useState<{ done: number; total: number } | null>(null);
   const mcHandle = useRef<McHandle | null>(null);
 
-  const { scenario, coalition, district, tab, lang } = state;
+  const { scenario, coalition, district, tab, lang, konfSplit: konfSplitOn } = state;
   const t = DICTS[lang];
 
   // deterministic pass — instant, on every change
   const det: DeterministicResult = useMemo(() => deterministic(scenario), [scenario]);
+
+  // Konfederacja → Nowa Nadzieja / Ruch Narodowy faction breakout
+  const konfSplit = useMemo(
+    () => (konfSplitOn ? splitKonfederacja(det.districts) : null),
+    [konfSplitOn, det]
+  );
 
   // Monte Carlo — debounced, cancellable, off-thread
   useEffect(() => {
@@ -74,12 +81,12 @@ export default function App() {
   // URL state sync
   useEffect(() => {
     const t = setTimeout(() => {
-      const q = encodeState({ scenario, coalition, district, tab, lang });
+      const q = encodeState({ scenario, coalition, district, tab, lang, konfSplit: konfSplitOn });
       const url = q ? `${location.pathname}${q}` : location.pathname;
       window.history.replaceState(null, "", url);
     }, 150);
     return () => clearTimeout(t);
-  }, [scenario, coalition, district, tab, lang]);
+  }, [scenario, coalition, district, tab, lang, konfSplitOn]);
 
   const patch = useCallback(
     (p: Partial<AppState>) => setState((s) => ({ ...s, ...p })),
@@ -135,7 +142,15 @@ export default function App() {
               <h2 className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">
                 {t.main.sejmTitle}
               </h2>
-              <span className="num flex items-center gap-1.5 text-[11px] text-slate-500">
+              <div className="flex items-center gap-3">
+                <label className="flex cursor-pointer items-center gap-1.5 text-[10px] uppercase tracking-widest text-slate-500">
+                  {t.konf.split}
+                  <Switch
+                    checked={konfSplitOn}
+                    onCheckedChange={(v) => patch({ konfSplit: v })}
+                  />
+                </label>
+                <span className="num flex items-center gap-1.5 text-[11px] text-slate-500">
                 {running && (
                   <>
                     <Loader2 size={11} className="animate-spin text-amber-500" />
@@ -148,12 +163,14 @@ export default function App() {
                 {!running && mc && (
                   <>{t.main.mcRuns(mc.iterations.toLocaleString(), mc.elapsedMs.toFixed(0))}</>
                 )}
-              </span>
+                </span>
+              </div>
             </div>
             <div className="relative mt-1 flex justify-center">
               <Hemicycle
                 seats={det.seats}
                 highlighted={coalition.length ? coalition : null}
+                konfSplit={konfSplit}
                 width={620}
               />
               {/* center overlay */}
@@ -184,6 +201,26 @@ export default function App() {
                 )}
               </div>
             </div>
+            {konfSplit && (
+              <div className="mt-2 flex justify-center gap-5 text-[11px] text-slate-400">
+                <span className="flex items-center gap-1.5">
+                  <span
+                    className="inline-block h-2.5 w-2.5 rounded-sm"
+                    style={{ background: KONF_FACTIONS.NN.color }}
+                  />
+                  {t.konf.nn}
+                  <span className="num font-semibold text-slate-100">{konfSplit.nn}</span>
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span
+                    className="inline-block h-2.5 w-2.5 rounded-sm border border-slate-600"
+                    style={{ background: KONF_FACTIONS.RN.color }}
+                  />
+                  {t.konf.rn}
+                  <span className="num font-semibold text-slate-100">{konfSplit.rn}</span>
+                </span>
+              </div>
+            )}
           </section>
 
           <CoalitionBuilder
@@ -200,7 +237,7 @@ export default function App() {
                 <TabsTrigger value="mc">{t.tabs.mc}</TabsTrigger>
               </TabsList>
               <TabsContent value="det" className="mt-3">
-                <DeterministicPanel det={det} />
+                <DeterministicPanel det={det} konfSplit={konfSplit} />
               </TabsContent>
               <TabsContent value="mc" className="mt-3">
                 {mc ? (

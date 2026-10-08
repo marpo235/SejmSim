@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { PARTIES, SPECTRUM_ORDER, type PartyId } from "@/data/parties";
+import { KONF_FACTIONS, PARTIES, SPECTRUM_ORDER, type PartyId } from "@/data/parties";
 
 export const HEMICYCLE_ID = "sejmsim-hemicycle";
 
@@ -43,10 +43,12 @@ function layout(total: number, rows: number): SeatPos[] {
 interface Props {
   seats: Record<PartyId, number>;
   highlighted?: PartyId[] | null;
+  /** When set, the KONF seat block is painted as NN (first nn seats) + RN. */
+  konfSplit?: { nn: number; rn: number } | null;
   width?: number;
 }
 
-export function Hemicycle({ seats, highlighted, width = 560 }: Props) {
+export function Hemicycle({ seats, highlighted, konfSplit, width = 560 }: Props) {
   const rows = 9;
   const height = width * 0.52;
   const positions = useMemo(() => layout(460, rows), []);
@@ -61,6 +63,25 @@ export function Hemicycle({ seats, highlighted, width = 560 }: Props) {
     }
     return out;
   }, [seats]);
+
+  // seat → fill color (KONF block splits into NN/RN when konfSplit is set)
+  const seatFills = useMemo(() => {
+    const out: (string | null)[] = new Array(460).fill(null);
+    let idx = 0;
+    for (const p of SPECTRUM_ORDER) {
+      const n = seats[p] ?? 0;
+      for (let s = 0; s < n; s++) {
+        if (idx >= 460) break;
+        out[idx++] =
+          p === "KONF" && konfSplit
+            ? s < konfSplit.nn
+              ? KONF_FACTIONS.NN.color
+              : KONF_FACTIONS.RN.color
+            : PARTIES[p].color;
+      }
+    }
+    return out;
+  }, [seats, konfSplit]);
 
   // majority boundary ticks: order all seats by angle, mark between seat #b and #b+1
   const markers = useMemo(() => {
@@ -107,7 +128,7 @@ export function Hemicycle({ seats, highlighted, width = 560 }: Props) {
               cx={pos.x}
               cy={pos.y}
               r={0.0155}
-              fill={p ? PARTIES[p].color : "#1e293b"}
+              fill={seatFills[i] ?? "#1e293b"}
               opacity={dim(p) ? 0.18 : 1}
             />
           );

@@ -57,6 +57,12 @@ const pl = {
     majority: "większość",
     minority: "mniejszość",
   },
+  konf: {
+    split: "Konfederacja: NN / RN",
+    nn: "Nowa Nadzieja",
+    rn: "Ruch Narodowy",
+    faction: "frakcja listy",
+  },
   coalition: {
     title: "Kreator koalicji",
     select: "wybierz komitety",
@@ -180,6 +186,12 @@ const en: typeof pl = {
     constitutional: "constitutional",
     majority: "majority",
     minority: "minority",
+  },
+  konf: {
+    split: "Konfederacja: NN / RN",
+    nn: "Nowa Nadzieja",
+    rn: "Ruch Narodowy",
+    faction: "list faction",
   },
   coalition: {
     title: "Coalition builder",

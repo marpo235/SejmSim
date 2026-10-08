@@ -148,6 +148,36 @@ export const SPECTRUM_ORDER: PartyId[] = [...PARTY_IDS].sort(
   (a, b) => PARTIES[a].spectrum - PARTIES[b].spectrum
 );
 
+/**
+ * Konfederacja sub-faction breakout — display layer only.
+ * KONF remains a single electoral committee in the engine; this mapping only
+ * decides which faction occupies each seat Konfederacja wins in a district.
+ * "NN" = Nowa Nadzieja (Mentzen), "RN" = Ruch Narodowy (Bosak).
+ */
+export type KonfFaction = "NN" | "RN";
+export const KONF_FACTIONS: Record<
+  KonfFaction,
+  { name: string; short: string; color: string }
+> = {
+  NN: { name: "Nowa Nadzieja", short: "NN", color: "#7fb3d4" },
+  RN: { name: "Ruch Narodowy", short: "RN", color: "#14294b" },
+};
+
+/**
+ * Districts where Nowa Nadzieja holds list slot #1 (21 urban/western/
+ * industrial). All other districts lead with Ruch Narodowy. The agreed
+ * sequence then alternates: NN-first = [NN,RN,NN,RN], RN-first = [RN,NN,RN,NN].
+ */
+export const KONF_NN_SLOT_ONE: ReadonlySet<number> = new Set([
+  1, 2, 3, 4, 5, 9, 12, 13, 19, 20, 21, 27, 28, 29, 30, 31, 32, 35, 38, 39, 41,
+]);
+
+export function konfSlotSeq(districtId: number): readonly KonfFaction[] {
+  return KONF_NN_SLOT_ONE.has(districtId)
+    ? ["NN", "RN", "NN", "RN"]
+    : ["RN", "NN", "RN", "NN"];
+}
+
 export interface Scenario {
   /** National vote share inputs in percent; residual is "others". */
   shares: Record<PartyId, number>;
