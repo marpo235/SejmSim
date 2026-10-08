@@ -39,15 +39,12 @@ const pl = {
   presetNames: {
     "Marcin Palade Baseline": "Bazowy wg Marcina Palade",
     "ewybory.eu Average": "Bazowy wg ewybory.eu",
-    "Bipolar Maximum": "Maksimum Bipolarne",
-    "Right-Wing Majority": "Większość Prawicy",
     "Tusk Megalist": "Super-lista Tuska",
   } as Record<string, string>,
   presetDescs: {
     "Marcin Palade Baseline": "Rozdrobniony wzrost prawicy; Lewica i R+ tuż nad progiem.",
     "ewybory.eu Average": "Średnia publicznych sondaży wg ewybory.eu.",
-    "Bipolar Maximum": "Konsolidacja dwóch bloków; R+ ginie pod progiem.",
-    "Right-Wing Majority": "Ścieżka większości PiS + Konfederacja + KKP.",
+    "09/26 wg Marcin Palade": "Sondaż Marcina Palade, wrzesień 2026.",
     "Tusk Megalist": "KO wchłania PSL i P2050 w jedną wspólną listę.",
   } as Record<string, string>,
   main: {
