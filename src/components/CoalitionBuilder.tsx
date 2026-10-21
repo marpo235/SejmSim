@@ -86,11 +86,16 @@ export function CoalitionBuilder({ seats, konfSplit, selected, onToggle, mc }: P
             key={b}
             className="absolute top-[-4px] bottom-[-4px] w-px bg-slate-400/70"
             style={{ left: `${(b / 460) * 100}%` }}
+          />
+        ))}
+        {[231, 276].map((b) => (
+          <span
+            key={`label-${b}`}
+            className="num absolute bottom-full mb-0.5 -translate-x-1/2 text-[9px] text-slate-500"
+            style={{ left: `${(b / 460) * 100}%` }}
           >
-            <span className="num absolute -top-4 -translate-x-1/2 text-[9px] text-slate-500">
-              {b}
-            </span>
-          </div>
+            {b}
+          </span>
         ))}
       </div>
       <div className="mt-4 flex items-center justify-between text-xs">

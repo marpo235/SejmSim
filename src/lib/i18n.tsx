@@ -55,6 +55,7 @@ const pl = {
     "ewybory.eu Average": "Pocz. 09/26",
     "10/26 wg ewybory.eu": "10/26",
     "Tusk Megalist": "09/26",
+    "Tusk Megalist 10/26": "10/26",
   } as Record<string, string>,
   presetDescs: {
     "Marcin Palade Baseline": "Rozdrobniony wzrost prawicy; Lewica i R+ tuż nad progiem.",
@@ -63,6 +64,7 @@ const pl = {
     "10/26 wg Marcin Palade": "Sondaż Marcina Palade, październik 2026.",
     "10/26 wg ewybory.eu": "Średnia publicznych sondaży wg ewybory.eu, październik 2026.",
     "Tusk Megalist": "KO wchłania PSL i P2050 w jedną wspólną listę.",
+    "Tusk Megalist 10/26": "KO wchłania PSL i P2050 w jedną wspólną listę (średnie 10/26).",
   } as Record<string, string>,
   main: {
     sejmTitle: "Sejm — 460 mandatów",
@@ -208,6 +210,7 @@ const en: typeof pl = {
     "ewybory.eu Average": "Early 09/26",
     "10/26 wg ewybory.eu": "10/26",
     "Tusk Megalist": "09/26",
+    "Tusk Megalist 10/26": "10/26",
   } as Record<string, string>,
   main: {
     sejmTitle: "Sejm — 460 seats",

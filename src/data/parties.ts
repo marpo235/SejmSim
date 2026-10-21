@@ -349,6 +349,24 @@ export const PRESETS: Preset[] = [
       P2050: 0,
     },
   },
+  {
+    name: "Tusk Megalist 10/26",
+    description:
+      "KO absorbs PSL & P2050 into a single joint committee, on the October 2026 averages.",
+    group: "tusk",
+    period: "10/26",
+    shares: {
+      KO: 36.0,
+      PIS: 20.4,
+      KONF: 14.05,
+      KKP: 10.5,
+      LEW: 6.35,
+      RP: 5.2,
+      RAZ: 3.9,
+      PSL: 0,
+      P2050: 0,
+    },
+  },
 ];
 
 /** Sidebar group ordering: poll sources vs hypothetical scenarios. */
