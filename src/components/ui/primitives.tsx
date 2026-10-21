@@ -50,8 +50,8 @@ export function Badge({
   const styles = {
     default: "bg-slate-800 text-slate-300 border-slate-700",
     outline: "text-slate-400 border-slate-700",
-    danger: "bg-red-950/60 text-red-300 border-red-900",
-    ok: "bg-emerald-950/60 text-emerald-300 border-emerald-900",
+    danger: "bg-red-950/40 text-red-400/80 border-red-900/50",
+    ok: "bg-emerald-950/40 text-emerald-400/80 border-emerald-900/50",
   }[variant];
   return (
     <span

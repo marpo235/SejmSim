@@ -129,40 +129,46 @@ export function Sidebar({ scenario, onChange, onPreset }: Props) {
                   onValueChange={([v]) => onChange({ ...scenario, sigma: v })}
                 />
               </div>
-              <div>
-                <div className="mb-1.5 text-[11px] text-slate-400">
-                  {t.sidebar.alpha}
-                </div>
-                <div className="space-y-1.5">
-                  {PARTY_IDS.map((p) => (
-                    <div key={p} className="flex items-center gap-2">
-                      <span className="w-10 text-[10px] font-mono" style={{ color: PARTIES[p].color }}>
-                        {PARTIES[p].short}
-                      </span>
-                      <Slider
-                        min={0}
-                        max={1.5}
-                        step={0.05}
-                        value={[scenario.alpha[p]]}
-                        onValueChange={([v]) =>
-                          onChange({
-                            ...scenario,
-                            alpha: { ...scenario.alpha, [p]: v },
-                          })
-                        }
-                        trackColor={PARTIES[p].color}
-                        className="flex-1"
-                      />
-                      <span className="num w-8 text-right text-[10px] text-slate-400">
-                        {scenario.alpha[p].toFixed(2)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-1 text-[9px] text-slate-600">
-                  {t.sidebar.alphaNote}
-                </div>
-              </div>
+              <Collapsible>
+                <CollapsibleTrigger className="group flex w-full cursor-pointer items-center justify-between rounded-md border border-slate-800 bg-slate-900/40 px-2 py-1.5 text-[11px] font-semibold text-slate-400 hover:text-slate-200">
+                  {t.sidebar.advGeo}
+                  <ChevronDown
+                    size={12}
+                    className="text-slate-600 transition-transform group-data-[state=open]:rotate-180"
+                  />
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="space-y-1.5 pt-2">
+                    {PARTY_IDS.map((p) => (
+                      <div key={p} className="flex items-center gap-2">
+                        <span className="w-10 text-[10px] font-mono" style={{ color: PARTIES[p].color }}>
+                          {PARTIES[p].short}
+                        </span>
+                        <Slider
+                          min={0}
+                          max={1.5}
+                          step={0.05}
+                          value={[scenario.alpha[p]]}
+                          onValueChange={([v]) =>
+                            onChange({
+                              ...scenario,
+                              alpha: { ...scenario.alpha, [p]: v },
+                            })
+                          }
+                          trackColor={PARTIES[p].color}
+                          className="flex-1"
+                        />
+                        <span className="num w-8 text-right text-[10px] text-slate-400">
+                          {scenario.alpha[p].toFixed(2)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-1 text-[9px] text-slate-600">
+                    {t.sidebar.alphaNote}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
               <div>
                 <div className="mb-1.5 text-[11px] text-slate-400">
                   {t.sidebar.committeeType}
@@ -281,11 +287,11 @@ function PartySlider({
           const n = parseFloat(e.target.value);
           if (Number.isFinite(n)) onChange(setShare(scenario, party, n));
         }}
-        className="num w-12 rounded border border-slate-700 bg-slate-950 px-1 py-0.5 text-right text-xs text-slate-200 focus:border-slate-500 focus:outline-none"
+        className="num w-16 min-w-0 rounded border border-slate-700 bg-slate-950 px-1.5 py-0.5 text-right text-xs text-slate-200 focus:border-slate-500 focus:outline-none"
       />
       <Badge
         variant={above ? "ok" : "danger"}
-        className="w-[76px] justify-center"
+        className="w-[58px] shrink-0 justify-center px-1 text-[9px]"
         title={above ? t.detPanel.inSejm : t.detPanel.outSejm}
       >
         {above ? `${t.badge.threshold} ≥${thr}%` : `<${thr}%`}

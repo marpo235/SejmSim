@@ -181,7 +181,7 @@ export default function App() {
                     onCheckedChange={onToggleKonfSplit}
                   />
                 </label>
-                <span className="num flex items-center gap-1.5 text-[11px] text-slate-500">
+                <span className="num flex items-center gap-1.5 text-[11px] text-slate-300">
                 {running && (
                   <>
                     <Loader2 size={11} className="animate-spin text-amber-500" />
@@ -304,7 +304,7 @@ export default function App() {
         </div>
       </main>
 
-      <footer className="mx-auto max-w-[1600px] px-3 pb-6 pt-2 text-[10px] leading-relaxed text-slate-600">
+      <footer className="mx-auto max-w-[1600px] px-3 pb-6 pt-2 text-[10px] leading-relaxed text-slate-400">
         {t.footer}
       </footer>
     </div>
