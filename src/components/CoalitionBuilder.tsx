@@ -1,19 +1,39 @@
-import { PARTIES, PARTY_IDS, type PartyId } from "@/data/parties";
+import {
+  KONF_FACTIONS,
+  KONF_MEMBER_IDS,
+  PARTIES,
+  PARTY_IDS,
+  type CoalitionMember,
+  type PartyId,
+} from "@/data/parties";
 import type { MonteCarloResult } from "@/engine/types";
 import { useT } from "@/lib/i18n";
+import { memberSeats, type KonfSplit } from "@/lib/konfSplit";
 import { cn, fmtPct } from "@/lib/utils";
 import { Badge } from "./ui/primitives";
 
 interface Props {
   seats: Record<PartyId, number>;
-  selected: PartyId[];
-  onToggle: (p: PartyId) => void;
+  konfSplit?: KonfSplit | null;
+  selected: CoalitionMember[];
+  onToggle: (p: CoalitionMember) => void;
   mc: MonteCarloResult | null;
 }
 
-export function CoalitionBuilder({ seats, selected, onToggle, mc }: Props) {
+export function CoalitionBuilder({ seats, konfSplit, selected, onToggle, mc }: Props) {
   const t = useT();
-  const total = selected.reduce((a, p) => a + (seats[p] ?? 0), 0);
+  // when the Konfederacja split is on, the "Konf" button becomes NN + RN
+  const members = PARTY_IDS.flatMap((p) => {
+    if (p === "KONF" && konfSplit) {
+      return KONF_MEMBER_IDS.map((f) => ({
+        id: f as CoalitionMember,
+        short: KONF_FACTIONS[f].short,
+        color: KONF_FACTIONS[f].color,
+      }));
+    }
+    return [{ id: p as CoalitionMember, short: PARTIES[p].short, color: PARTIES[p].color }];
+  });
+  const total = selected.reduce((a, m) => a + memberSeats(m, seats, konfSplit), 0);
   const pct = Math.min(100, (total / 460) * 100);
   const majority = total >= 231;
   const constitutional = total >= 276;
@@ -30,13 +50,13 @@ export function CoalitionBuilder({ seats, selected, onToggle, mc }: Props) {
         </span>
       </div>
       <div className="mb-3 flex flex-wrap gap-1.5">
-        {PARTY_IDS.map((p) => {
-          const on = selected.includes(p);
-          const s = seats[p] ?? 0;
+        {members.map((m) => {
+          const on = selected.includes(m.id);
+          const s = memberSeats(m.id, seats, konfSplit);
           return (
             <button
-              key={p}
-              onClick={() => onToggle(p)}
+              key={m.id}
+              onClick={() => onToggle(m.id)}
               disabled={s === 0 && !on}
               className={cn(
                 "rounded-md border px-2 py-1 text-[11px] font-mono font-semibold transition-all cursor-pointer",
@@ -45,9 +65,9 @@ export function CoalitionBuilder({ seats, selected, onToggle, mc }: Props) {
                   : "border-slate-700 bg-slate-900 text-slate-300 hover:border-slate-500",
                 s === 0 && !on && "opacity-30 cursor-not-allowed"
               )}
-              style={on ? { background: PARTIES[p].color } : { color: PARTIES[p].color }}
+              style={on ? { background: m.color } : { color: m.color }}
             >
-              {PARTIES[p].short} {s > 0 && <span className="opacity-80">{s}</span>}
+              {m.short} {s > 0 && <span className="opacity-80">{s}</span>}
             </button>
           );
         })}

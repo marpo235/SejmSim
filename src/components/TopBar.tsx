@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { PRESETS } from "@/data/parties";
+import { useMemo, useState } from "react";
+import { PRESETS, latestPresetPeriod, periodValue } from "@/data/parties";
 import type { DeterministicResult } from "@/engine/types";
 import { exportCsv, exportSvgAsPng } from "@/lib/exporters";
 import { useT, type Lang } from "@/lib/i18n";
@@ -21,6 +21,17 @@ export function TopBar({ onPreset, det, lang, onLang }: Props) {
   const t = useT();
   const [methodOpen, setMethodOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  /**
+   * The dropdown only lists presets from the most recent poll period
+   * (e.g. while all presets are tagged 09/26, everything shows; once a
+   * newer 10/26 preset is added, the older ones hide automatically).
+   */
+  const visiblePresets = useMemo(() => {
+    const latest = latestPresetPeriod();
+    const latestV = latest ? periodValue(latest) : -1;
+    return PRESETS.filter((p) => periodValue(p.period) >= latestV);
+  }, []);
 
   const share = async () => {
     const url = window.location.href;
@@ -69,9 +80,9 @@ export function TopBar({ onPreset, det, lang, onLang }: Props) {
             <option value="" disabled>
               {t.topbar.presets}
             </option>
-            {PRESETS.map((p) => (
+            {visiblePresets.map((p) => (
               <option key={p.name} value={p.name}>
-                {t.presetNames[p.name] ?? p.name}
+                {t.presetGroups[p.group] ?? p.group} · {t.presetOptions[p.name] ?? p.name}
               </option>
             ))}
           </select>

@@ -1,4 +1,13 @@
-import { PARTIES, PARTY_IDS, PRESETS, type PartyId, type Scenario } from "@/data/parties";
+import {
+  PARTIES,
+  PARTY_IDS,
+  POLL_GROUPS,
+  SCENARIO_GROUPS,
+  presetsInGroup,
+  type PartyId,
+  type PresetGroupId,
+  type Scenario,
+} from "@/data/parties";
 import { isAboveThreshold, otherShare, setShare, thresholdOf } from "@/lib/scenario";
 import { useT } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -58,23 +67,24 @@ export function Sidebar({ scenario, onChange, onPreset }: Props) {
         </div>
       </section>
 
-      {/* presets */}
+      {/* polls */}
       <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-3">
-        <h2 className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+        <h2 className="mb-1 text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+          {t.sidebar.pollsTitle}
+        </h2>
+        {POLL_GROUPS.map((g) => (
+          <PresetGroup key={g} group={g} onPreset={onPreset} />
+        ))}
+      </section>
+
+      {/* scenarios */}
+      <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-3">
+        <h2 className="mb-1 text-[11px] font-semibold uppercase tracking-widest text-slate-400">
           {t.sidebar.presetsTitle}
         </h2>
-        <div className="grid grid-cols-2 gap-1.5">
-          {PRESETS.map((pr) => (
-            <button
-              key={pr.name}
-              onClick={() => onPreset(pr.name)}
-              title={t.presetDescs[pr.name] ?? pr.description}
-              className="rounded-md border border-slate-700/80 bg-slate-800/60 px-2 py-1.5 text-left text-[11px] font-medium leading-snug text-slate-200 transition-colors hover:border-amber-500/50 hover:bg-slate-800 cursor-pointer"
-            >
-              {t.presetNames[pr.name] ?? pr.name}
-            </button>
-          ))}
-        </div>
+        {SCENARIO_GROUPS.map((g) => (
+          <PresetGroup key={g} group={g} onPreset={onPreset} />
+        ))}
       </section>
 
       {/* advanced engine config */}
@@ -192,6 +202,44 @@ export function Sidebar({ scenario, onChange, onPreset }: Props) {
         </Collapsible>
       </section>
     </aside>
+  );
+}
+
+/** Collapsible poll-source / scenario group with preset options inside. */
+function PresetGroup({
+  group,
+  onPreset,
+}: {
+  group: PresetGroupId;
+  onPreset: (name: string) => void;
+}) {
+  const t = useT();
+  const items = presetsInGroup(group);
+  if (!items.length) return null;
+  return (
+    <Collapsible defaultOpen>
+      <CollapsibleTrigger className="group flex w-full cursor-pointer items-center justify-between border-t border-slate-800/70 px-0.5 py-2 text-[11px] font-semibold text-slate-300 hover:text-slate-100">
+        {t.presetGroups[group] ?? group}
+        <ChevronDown
+          size={13}
+          className="text-slate-500 transition-transform group-data-[state=open]:rotate-180"
+        />
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <div className="grid gap-1 pb-1.5">
+          {items.map((pr) => (
+            <button
+              key={pr.name}
+              onClick={() => onPreset(pr.name)}
+              title={t.presetDescs[pr.name] ?? pr.description}
+              className="rounded-md border border-slate-700/80 bg-slate-800/60 px-2 py-1.5 text-left text-[11px] font-medium leading-snug text-slate-200 transition-colors hover:border-amber-500/50 hover:bg-slate-800 cursor-pointer"
+            >
+              {t.presetOptions[pr.name] ?? pr.name}
+            </button>
+          ))}
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
 

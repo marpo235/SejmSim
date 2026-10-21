@@ -1,4 +1,4 @@
-import { konfSlotSeq, type KonfFaction } from "@/data/parties";
+import { konfSlotSeq, type CoalitionMember, type KonfFaction, type PartyId } from "@/data/parties";
 import type { DistrictResult } from "@/engine/types";
 
 export interface KonfSplit {
@@ -30,4 +30,38 @@ export function splitKonfederacja(districts: DistrictResult[]): KonfSplit {
     out.rn += rn;
   }
   return out;
+}
+
+/**
+ * Seat count of a coalition-builder member: real committees read the
+ * D'Hondt result; NN/RN factions read the deterministic Konfederacja split
+ * (0 when the split toggle is off).
+ */
+export function memberSeats(
+  m: CoalitionMember,
+  seats: Record<PartyId, number>,
+  split: Pick<KonfSplit, "nn" | "rn"> | null | undefined
+): number {
+  if (m === "NN") return split?.nn ?? 0;
+  if (m === "RN") return split?.rn ?? 0;
+  return seats[m] ?? 0;
+}
+
+/**
+ * Translate a UI coalition (which may contain NN/RN factions) into the
+ * committee-level list the MC engine can evaluate. Both factions selected
+ * together ≈ the whole Konfederacja committee; a lone faction can't be
+ * evaluated (the engine doesn't split KONF seats) and is dropped.
+ */
+export function engineCoalitionOf(members: CoalitionMember[]): PartyId[] {
+  const both = members.includes("NN") && members.includes("RN");
+  const out = new Set<PartyId>();
+  for (const m of members) {
+    if (m === "NN" || m === "RN") {
+      if (both) out.add("KONF");
+    } else {
+      out.add(m);
+    }
+  }
+  return [...out];
 }

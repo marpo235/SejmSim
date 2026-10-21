@@ -1,7 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { KONF_FACTIONS, PRESETS, type PartyId, type Scenario } from "@/data/parties";
+import {
+  KONF_FACTIONS,
+  PRESETS,
+  type CoalitionMember,
+  type PartyId,
+  type Scenario,
+} from "@/data/parties";
 import { applyShares } from "@/lib/scenario";
-import { splitKonfederacja } from "@/lib/konfSplit";
+import { engineCoalitionOf, memberSeats, splitKonfederacja } from "@/lib/konfSplit";
 import { decodeState, encodeState, type AppState } from "@/lib/urlState";
 import { DICTS, LangContext, type Lang } from "@/lib/i18n";
 import { deterministic, runMonteCarloAsync, type McHandle } from "@/engine/client";
@@ -52,12 +58,16 @@ export default function App() {
     [konfSplitOn, det]
   );
 
+  // committee-level view of the UI coalition for the MC engine —
+  // NN+RN selected together ≈ whole Konfederacja; a lone faction is dropped
+  const engineCoalition = useMemo(() => engineCoalitionOf(coalition), [coalition]);
+
   // Monte Carlo — debounced, cancellable, off-thread
   useEffect(() => {
     setMcProgress({ done: 0, total: scenario.iterations });
     const t = setTimeout(() => {
       mcHandle.current?.cancel();
-      const handle = runMonteCarloAsync(scenario, coalition, (done, total) =>
+      const handle = runMonteCarloAsync(scenario, engineCoalition, (done, total) =>
         setMcProgress({ done, total })
       );
       mcHandle.current = handle;
@@ -69,7 +79,7 @@ export default function App() {
         .catch(() => setMcProgress(null));
     }, 350);
     return () => clearTimeout(t);
-  }, [scenario, coalition]);
+  }, [scenario, engineCoalition]);
 
   useEffect(() => () => mcHandle.current?.cancel(), []);
 
@@ -101,7 +111,7 @@ export default function App() {
     [patch, state.scenario]
   );
   const onToggleCoalition = useCallback(
-    (p: PartyId) =>
+    (p: CoalitionMember) =>
       patch({
         coalition: coalition.includes(p)
           ? coalition.filter((x) => x !== p)
@@ -110,10 +120,31 @@ export default function App() {
     [patch, coalition]
   );
 
+  // toggle the Konfederacja NN/RN split and migrate the coalition selection:
+  // "KONF" ↔ both factions, so the builder never keeps a stale invisible pick
+  const onToggleKonfSplit = useCallback(
+    (v: boolean) => {
+      let next = coalition;
+      if (v) {
+        next = coalition.filter((m) => m !== "KONF");
+        if (coalition.includes("KONF")) next = [...next, "NN", "RN"];
+      } else {
+        next = coalition.filter((m) => m !== "NN" && m !== "RN");
+        if (coalition.includes("NN") || coalition.includes("RN"))
+          next = [...next, "KONF"];
+      }
+      patch({ konfSplit: v, coalition: next });
+    },
+    [patch, coalition]
+  );
+
   const onLang = useCallback((l: Lang) => patch({ lang: l }), [patch]);
 
   const selectedDistrict = det.districts.find((d) => d.id === district) ?? null;
-  const coalitionSeats = coalition.reduce((a, p) => a + det.seats[p], 0);
+  const coalitionSeats = coalition.reduce(
+    (a, m) => a + memberSeats(m, det.seats, konfSplit),
+    0
+  );
   const running = mcProgress != null;
 
   return (
@@ -147,7 +178,7 @@ export default function App() {
                   {t.konf.split}
                   <Switch
                     checked={konfSplitOn}
-                    onCheckedChange={(v) => patch({ konfSplit: v })}
+                    onCheckedChange={onToggleKonfSplit}
                   />
                 </label>
                 <span className="num flex items-center gap-1.5 text-[11px] text-slate-500">
@@ -225,6 +256,7 @@ export default function App() {
 
           <CoalitionBuilder
             seats={det.seats}
+            konfSplit={konfSplit}
             selected={coalition}
             onToggle={onToggleCoalition}
             mc={mc}

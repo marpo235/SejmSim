@@ -1,5 +1,12 @@
 import { useMemo } from "react";
-import { KONF_FACTIONS, PARTIES, SPECTRUM_ORDER, type PartyId } from "@/data/parties";
+import {
+  KONF_FACTIONS,
+  PARTIES,
+  SPECTRUM_ORDER,
+  type CoalitionMember,
+  type KonfFaction,
+  type PartyId,
+} from "@/data/parties";
 
 export const HEMICYCLE_ID = "sejmsim-hemicycle";
 
@@ -42,7 +49,7 @@ function layout(total: number, rows: number): SeatPos[] {
 
 interface Props {
   seats: Record<PartyId, number>;
-  highlighted?: PartyId[] | null;
+  highlighted?: CoalitionMember[] | null;
   /** When set, the KONF seat block is painted as NN (first nn seats) + RN. */
   konfSplit?: { nn: number; rn: number } | null;
   width?: number;
@@ -53,16 +60,6 @@ export function Hemicycle({ seats, highlighted, konfSplit, width = 560 }: Props)
   const height = width * 0.52;
   const positions = useMemo(() => layout(460, rows), []);
   const seatR = useMemo(() => Math.max(2.6, width * 0.0068), [width]);
-
-  // seat → party assignment in spectrum order, left→right
-  const seatParties: (PartyId | null)[] = useMemo(() => {
-    const out: (PartyId | null)[] = new Array(460).fill(null);
-    let idx = 0;
-    for (const p of SPECTRUM_ORDER) {
-      for (let s = 0; s < (seats[p] ?? 0); s++) if (idx < 460) out[idx++] = p;
-    }
-    return out;
-  }, [seats]);
 
   // seat → fill color (KONF block splits into NN/RN when konfSplit is set)
   const seatFills = useMemo(() => {
@@ -106,8 +103,30 @@ export function Hemicycle({ seats, highlighted, konfSplit, width = 560 }: Props)
     return ticks;
   }, [positions]);
 
-  const dim = (p: PartyId | null) =>
-    highlighted && highlighted.length > 0 && (!p || !highlighted.includes(p));
+  // seat → selected flag: parties match by id; with the split on, each KONF
+  // seat is selected only when its own faction (NN/RN) is in the coalition
+  const seatSelected = useMemo(() => {
+    const out = new Array<boolean>(460).fill(true);
+    if (!highlighted || highlighted.length === 0) return out;
+    let idx = 0;
+    for (const p of SPECTRUM_ORDER) {
+      const n = seats[p] ?? 0;
+      for (let s = 0; s < n; s++) {
+        if (idx >= 460) break;
+        let sel = highlighted.includes(p as CoalitionMember);
+        if (!sel && p === "KONF" && konfSplit) {
+          const f: KonfFaction = s < konfSplit.nn ? "NN" : "RN";
+          sel = highlighted.includes(f);
+        }
+        out[idx++] = sel;
+      }
+    }
+    for (; idx < 460; idx++) out[idx] = false;
+    return out;
+  }, [seats, highlighted, konfSplit]);
+
+  const dim = (i: number) =>
+    highlighted && highlighted.length > 0 && !seatSelected[i];
 
   return (
     <svg
@@ -120,19 +139,16 @@ export function Hemicycle({ seats, highlighted, konfSplit, width = 560 }: Props)
       aria-label="Sejm hemicycle"
     >
       <g transform="scale(1,-1)">
-        {positions.map((pos, i) => {
-          const p = seatParties[i];
-          return (
-            <circle
-              key={i}
-              cx={pos.x}
-              cy={pos.y}
-              r={0.0155}
-              fill={seatFills[i] ?? "#1e293b"}
-              opacity={dim(p) ? 0.18 : 1}
-            />
-          );
-        })}
+        {positions.map((pos, i) => (
+          <circle
+            key={i}
+            cx={pos.x}
+            cy={pos.y}
+            r={0.0155}
+            fill={seatFills[i] ?? "#1e293b"}
+            opacity={dim(i) ? 0.18 : 1}
+          />
+        ))}
         {markers.map((m, i) => (
           <g key={i}>
             <line

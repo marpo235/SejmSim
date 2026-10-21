@@ -22,6 +22,7 @@ const pl = {
     polling: "Sondaż krajowy",
     autoNorm: "auto-normalizacja",
     others: "inne",
+    pollsTitle: "Sondaże",
     presetsTitle: "Scenariusze",
     engineConfig: "Zaawansowane parametry silnika",
     w25: "Waga wyborów 2025 (w₂₅)",
@@ -40,6 +41,17 @@ const pl = {
     "Marcin Palade Baseline": "Bazowy wg Marcina Palade",
     "ewybory.eu Average": "Bazowy wg ewybory.eu",
     "Tusk Megalist": "Super-lista Tuska",
+  } as Record<string, string>,
+  presetGroups: {
+    palade: "Marcin Palade",
+    ewybory: "ewybory.eu",
+    tusk: "Super-lista Tuska",
+  } as Record<string, string>,
+  presetOptions: {
+    "Marcin Palade Baseline": "Pocz. 09/26",
+    "09/26 wg Marcin Palade": "Koniec 09/26",
+    "ewybory.eu Average": "Pocz. 09/26",
+    "Tusk Megalist": "09/26",
   } as Record<string, string>,
   presetDescs: {
     "Marcin Palade Baseline": "Rozdrobniony wzrost prawicy; Lewica i R+ tuż nad progiem.",
@@ -163,7 +175,8 @@ const en: typeof pl = {
     polling: "National polling",
     autoNorm: "auto-normalize",
     others: "oth.",
-    presetsTitle: "Scenario presets",
+    pollsTitle: "Polls",
+    presetsTitle: "Scenarios",
     engineConfig: "Advanced engine configuration",
     w25: "2025 election weight (w₂₅)",
     w25Left: "2023 Sejm only",
@@ -177,6 +190,17 @@ const en: typeof pl = {
   badge: { threshold: "THR" },
   presetNames: {},
   presetDescs: {},
+  presetGroups: {
+    palade: "Marcin Palade",
+    ewybory: "ewybory.eu",
+    tusk: "Tusk Megalist",
+  } as Record<string, string>,
+  presetOptions: {
+    "Marcin Palade Baseline": "Early 09/26",
+    "09/26 wg Marcin Palade": "Late 09/26",
+    "ewybory.eu Average": "Early 09/26",
+    "Tusk Megalist": "09/26",
+  } as Record<string, string>,
   main: {
     sejmTitle: "Sejm — 460 seats",
     sampling: (d: string, t: string) => `sampling ${d}/${t}`,

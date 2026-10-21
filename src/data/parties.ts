@@ -223,9 +223,26 @@ export function defaultScenario(): Scenario {
   };
 }
 
+/**
+ * Coalition-builder member: a real committee or — when the KONF split
+ * toggle is on — one of the two Konfederacja factions.
+ */
+export type CoalitionMember = PartyId | KonfFaction;
+export const KONF_MEMBER_IDS: KonfFaction[] = ["NN", "RN"];
+
 export interface Preset {
   name: string;
   description: string;
+  /**
+   * Poll-source / scenario bucket shown in the sidebar:
+   * "palade" & "ewybory" live under SONDAŻE, "tusk" under SCENARIUSZE.
+   */
+  group: "palade" | "ewybory" | "tusk";
+  /**
+   * Poll period tag "MM/YY". The top-bar preset dropdown only lists presets
+   * from the most recent period found here.
+   */
+  period: string;
   shares: Partial<Record<PartyId, number>>;
 }
 
@@ -233,6 +250,8 @@ export const PRESETS: Preset[] = [
   {
     name: "Marcin Palade Baseline",
     description: "Fragmented right surge; Lewica and R+ barely over the line.",
+    group: "palade",
+    period: "09/26",
     shares: {
       KO: 31.0,
       PIS: 21.0,
@@ -248,6 +267,8 @@ export const PRESETS: Preset[] = [
   {
     name: "ewybory.eu Average",
     description: "Public polling average baseline from ewybory.eu.",
+    group: "ewybory",
+    period: "09/26",
     shares: {
       KO: 30.8,
       PIS: 19.1,
@@ -263,6 +284,8 @@ export const PRESETS: Preset[] = [
   {
     name: "09/26 wg Marcin Palade",
     description: "Marcin Palade September 2026 polling baseline.",
+    group: "palade",
+    period: "09/26",
     shares: {
       KO: 32.4,
       PIS: 21.2,
@@ -278,6 +301,8 @@ export const PRESETS: Preset[] = [
   {
     name: "Tusk Megalist",
     description: "KO absorbs PSL & P2050 into a single joint committee.",
+    group: "tusk",
+    period: "09/26",
     shares: {
       KO: 40,
       PIS: 23,
@@ -291,3 +316,32 @@ export const PRESETS: Preset[] = [
     },
   },
 ];
+
+/** Sidebar group ordering: poll sources vs hypothetical scenarios. */
+export const POLL_GROUPS = ["palade", "ewybory"] as const;
+export const SCENARIO_GROUPS = ["tusk"] as const;
+export type PresetGroupId = (typeof POLL_GROUPS)[number] | (typeof SCENARIO_GROUPS)[number];
+
+export function presetsInGroup(group: PresetGroupId): Preset[] {
+  return PRESETS.filter((p) => p.group === group);
+}
+
+/** "MM/YY" → comparable numeric key (year*12+month); garbage → -1. */
+export function periodValue(period: string): number {
+  const m = period.match(/^(\d{2})\/(\d{2})$/);
+  return m ? +m[2] * 12 + +m[1] : -1;
+}
+
+/** Most recent period tag across all presets — drives the top-bar filter. */
+export function latestPresetPeriod(): string | null {
+  let best: string | null = null;
+  let bestV = -1;
+  for (const pr of PRESETS) {
+    const v = periodValue(pr.period);
+    if (v > bestV) {
+      bestV = v;
+      best = pr.period;
+    }
+  }
+  return best;
+}

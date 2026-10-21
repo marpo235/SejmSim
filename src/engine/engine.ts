@@ -318,10 +318,13 @@ export function dryNational(
   ) as Record<PartyId, number>;
 }
 
-/** Percentile helper over a seat histogram. */
+/** Inverse empirical CDF percentile over sorted samples. */
 function percentile(sorted: number[], p: number): number {
   if (sorted.length === 0) return 0;
-  const idx = Math.min(sorted.length - 1, Math.floor(p * sorted.length));
+  const idx = Math.min(
+    sorted.length - 1,
+    Math.floor(p * (sorted.length - 1))
+  );
   return sorted[idx];
 }
 
@@ -350,7 +353,8 @@ export function runMonteCarlo(
   const { c, other } = sharesToFractions(scenario.shares);
   const K = PARTY_IDS.length;
   const gauss = new Gaussian(mulberry32(seed));
-  const rho = opts.rho ?? 0.25;
+  // equicorrelation must stay < 1 — sqrt(1-ρ) would go NaN otherwise
+  const rho = Math.min(0.95, Math.max(0, opts.rho ?? 0.25));
   const sample = makeSampler(c, other, scenario.sigma, rho, gauss);
 
   const iters = scenario.iterations;
@@ -364,7 +368,9 @@ export function runMonteCarlo(
     co.members.map((p) => PARTY_IDS.indexOf(p))
   );
   const coalSeats = NAMED_COALITIONS.map(() => new Float64Array(iters));
-  const customIdx = (opts.customCoalition ?? []).map((p) => PARTY_IDS.indexOf(p));
+  const customIdx = [
+    ...new Set((opts.customCoalition ?? []).map((p) => PARTY_IDS.indexOf(p))),
+  ].filter((i) => i >= 0);
   const customSeats = new Float64Array(iters);
 
   const progressEvery = Math.max(1, Math.floor(iters / 20));
@@ -390,6 +396,7 @@ export function runMonteCarlo(
     }
     if (opts.onProgress && it % progressEvery === 0) opts.onProgress(it, iters);
   }
+  opts.onProgress?.(iters, iters); // guarantee the progress bar completes
 
   const distributions: SeatDistribution[] = SPECTRUM_ORDER.map((p) => {
     const k = PARTY_IDS.indexOf(p);

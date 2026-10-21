@@ -2,6 +2,7 @@ import {
   PARTY_IDS,
   PARTIES,
   defaultScenario,
+  type CoalitionMember,
   type PartyId,
   type Scenario,
 } from "@/data/parties";
@@ -10,7 +11,7 @@ import type { Lang } from "./i18n";
 /** Serialize the full scenario + view state into a compact query string. */
 export interface AppState {
   scenario: Scenario;
-  coalition: PartyId[];
+  coalition: CoalitionMember[];
   district: number | null;
   tab: "det" | "mc";
   lang: Lang;
@@ -54,7 +55,7 @@ function trim(n: number): string {
   return String(Math.round(n * 1000) / 1000);
 }
 
-const SHORT: Record<string, PartyId> = {
+const PARTY_SHORT: Record<string, PartyId> = {
   raz: "RAZ",
   lew: "LEW",
   ko: "KO",
@@ -64,6 +65,13 @@ const SHORT: Record<string, PartyId> = {
   pis: "PIS",
   konf: "KONF",
   kkp: "KKP",
+};
+
+/** Coalition members = committees + Konfederacja factions (split toggle). */
+const SHORT: Record<string, CoalitionMember> = {
+  ...PARTY_SHORT,
+  nn: "NN",
+  rn: "RN",
 };
 
 export function decodeState(search: string): AppState {
@@ -87,8 +95,8 @@ export function decodeState(search: string): AppState {
   if (a) {
     for (const part of a.split(",")) {
       const m = part.match(/^([a-z0-9]+?)([\d.]+)$/);
-      if (m && SHORT[m[1]]) {
-        s.alpha[SHORT[m[1]]] = Math.min(1.5, Math.max(0, parseFloat(m[2])));
+      if (m && PARTY_SHORT[m[1]]) {
+        s.alpha[PARTY_SHORT[m[1]]] = Math.min(1.5, Math.max(0, parseFloat(m[2])));
       }
     }
   }
@@ -96,13 +104,13 @@ export function decodeState(search: string): AppState {
   if (cf) {
     for (const part of cf.split(",")) {
       const m = part.match(/^([a-z0-9]+?)([01])$/);
-      if (m && SHORT[m[1]]) s.coalitionFlag[SHORT[m[1]]] = m[2] === "1";
+      if (m && PARTY_SHORT[m[1]]) s.coalitionFlag[PARTY_SHORT[m[1]]] = m[2] === "1";
     }
   }
   const coalition = (p.get("coal") ?? "")
     .split(",")
     .map((x) => SHORT[x.trim()])
-    .filter((x): x is PartyId => !!x);
+    .filter((x): x is CoalitionMember => !!x);
   const d = parseInt(p.get("d") ?? "", 10);
   const district = Number.isFinite(d) && d >= 1 && d <= 41 ? d : null;
   const tab = p.get("t") === "mc" ? "mc" : "det";
