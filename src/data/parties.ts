@@ -164,19 +164,13 @@ export const KONF_FACTIONS: Record<
 };
 
 /**
- * Districts where Nowa Nadzieja holds list slot #1 (21 urban/western/
- * industrial). All other districts lead with Ruch Narodowy. The agreed
- * sequence then alternates: NN-first = [NN,RN,NN,RN], RN-first = [RN,NN,RN,NN].
+ * Faction seat split for Konfederacja: Nowa Nadzieja (Mentzen) is the
+ * slightly larger faction, so KONF seats are divided ≈ 55/45 in NN's
+ * favour. Applied per district via largest remainder (see konfSplit.ts),
+ * which keeps both factions visible in most districts while NN always
+ * edges RN nationally regardless of the Konfederacja vote share.
  */
-export const KONF_NN_SLOT_ONE: ReadonlySet<number> = new Set([
-  1, 2, 3, 4, 5, 9, 12, 13, 19, 20, 21, 27, 28, 29, 30, 31, 32, 35, 38, 39, 41,
-]);
-
-export function konfSlotSeq(districtId: number): readonly KonfFaction[] {
-  return KONF_NN_SLOT_ONE.has(districtId)
-    ? ["NN", "RN", "NN", "RN"]
-    : ["RN", "NN", "RN", "NN"];
-}
+export const KONF_NN_WEIGHT = 0.55;
 
 export interface Scenario {
   /** National vote share inputs in percent; residual is "others". */
