@@ -50,13 +50,17 @@ const pl = {
   presetOptions: {
     "Marcin Palade Baseline": "Pocz. 09/26",
     "09/26 wg Marcin Palade": "Koniec 09/26",
+    "10/26 wg Marcin Palade": "10/26",
     "ewybory.eu Average": "Pocz. 09/26",
+    "10/26 wg ewybory.eu": "10/26",
     "Tusk Megalist": "09/26",
   } as Record<string, string>,
   presetDescs: {
     "Marcin Palade Baseline": "Rozdrobniony wzrost prawicy; Lewica i R+ tuż nad progiem.",
     "ewybory.eu Average": "Średnia publicznych sondaży wg ewybory.eu.",
     "09/26 wg Marcin Palade": "Sondaż Marcina Palade, wrzesień 2026.",
+    "10/26 wg Marcin Palade": "Sondaż Marcina Palade, październik 2026.",
+    "10/26 wg ewybory.eu": "Średnia publicznych sondaży wg ewybory.eu, październik 2026.",
     "Tusk Megalist": "KO wchłania PSL i P2050 w jedną wspólną listę.",
   } as Record<string, string>,
   main: {
@@ -198,7 +202,9 @@ const en: typeof pl = {
   presetOptions: {
     "Marcin Palade Baseline": "Early 09/26",
     "09/26 wg Marcin Palade": "Late 09/26",
+    "10/26 wg Marcin Palade": "10/26",
     "ewybory.eu Average": "Early 09/26",
+    "10/26 wg ewybory.eu": "10/26",
     "Tusk Megalist": "09/26",
   } as Record<string, string>,
   main: {
