@@ -164,13 +164,19 @@ export const KONF_FACTIONS: Record<
 };
 
 /**
- * Faction seat split for Konfederacja: Nowa Nadzieja (Mentzen) is the
- * slightly larger faction, so KONF seats are divided ≈ 55/45 in NN's
- * favour. Applied per district via largest remainder (see konfSplit.ts),
- * which keeps both factions visible in most districts while NN always
- * edges RN nationally regardless of the Konfederacja vote share.
+ * Historical Konfederacja list leaders ("jedynki") per district from the
+ * 2023 election, compressed to the two factions modelled here — KKP
+ * (Korona/Braun) runs as its own committee, so its 2023 list leaders are
+ * reassigned to the remaining factions in the 23 NN / 18 RN proportion.
+ * Index 0..40 = district 1..41.
  */
-export const KONF_NN_WEIGHT = 0.55;
+export const KONF_JEDYNKI: readonly KonfFaction[] = [
+  "NN", "RN", "RN", "RN", "NN", "NN", "RN", "RN", "NN", "RN", // 1-10
+  "RN", "NN", "NN", "NN", "NN", "RN", "RN", "RN", "NN", "NN", // 11-20
+  "NN", "NN", "NN", "RN", "RN", "NN", "NN", "RN", "NN", "RN", // 21-30
+  "NN", "NN", "RN", "NN", "RN", "RN", "RN", "NN", "NN", "NN", // 31-40
+  "NN",                                                       // 41
+];
 
 export interface Scenario {
   /** National vote share inputs in percent; residual is "others". */
