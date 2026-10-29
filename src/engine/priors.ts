@@ -99,11 +99,29 @@ export function buildPriors(w25: number): Record<PartyId, Float64Array> {
  */
 export function buildDispersion(
   priors: Record<PartyId, Float64Array>,
-  alpha: Record<PartyId, number>
+  alpha: Record<PartyId, number>,
+  blend?: Partial<Record<PartyId, Partial<Record<PartyId, number>>>>
 ): Record<PartyId, Float64Array> {
   const out = {} as Record<PartyId, Float64Array>;
   for (const id of PARTY_IDS) {
-    const g = priors[id];
+    let g = priors[id];
+    // merged committee: share-weighted mean of component prior shapes
+    const b = blend?.[id];
+    if (b) {
+      const mixed = new Float64Array(N_DISTRICTS);
+      let wTot = 0;
+      for (const [comp, w] of Object.entries(b)) {
+        if (!w) continue;
+        const cg = priors[comp as PartyId];
+        if (!cg) continue;
+        for (let d = 0; d < N_DISTRICTS; d++) mixed[d] += w * cg[d];
+        wTot += w;
+      }
+      if (wTot > 0) {
+        for (let d = 0; d < N_DISTRICTS; d++) mixed[d] /= wTot;
+        g = mixed;
+      }
+    }
     const a = alpha[id];
     const arr = new Float64Array(N_DISTRICTS);
     if (a === 0) {

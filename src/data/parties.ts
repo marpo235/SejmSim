@@ -191,6 +191,13 @@ export interface Scenario {
   /** Committee-type overrides: true = 8% coalition threshold. */
   coalitionFlag: Record<PartyId, boolean>;
   iterations: number;
+  /**
+   * Merged-committee geography: target → { component → national-share weight }.
+   * The target's district shape becomes the share-weighted mean of the
+   * components' prior shapes (e.g. a KO+PSL+P2050+Lewica superlist blends
+   * all four geographies before α is applied). Set by merged presets.
+   */
+  dispersionBlend?: Partial<Record<PartyId, Partial<Record<PartyId, number>>>>;
 }
 
 export const DEFAULT_SHARES: Record<PartyId, number> = {
@@ -230,6 +237,20 @@ export function defaultScenario(): Scenario {
 export type CoalitionMember = PartyId | KonfFaction;
 export const KONF_MEMBER_IDS: KonfFaction[] = ["NN", "RN"];
 
+/**
+ * Vote-transfer rule for merged committees: `keep` of `from`'s share follows
+ * `into`, `redirect` fractions flow to named parties, the remainder drops to
+ * the "other"/abstention residual. `from` is zeroed out.
+ */
+export interface MergeSpec {
+  into: PartyId;
+  from: PartyId;
+  /** fraction of `from`'s share that follows onto the joint list */
+  keep: number;
+  /** fractions of `from`'s share redirected to other committees */
+  redirect?: Partial<Record<PartyId, number>>;
+}
+
 export interface Preset {
   name: string;
   description: string;
@@ -244,6 +265,7 @@ export interface Preset {
    */
   period: string;
   shares: Partial<Record<PartyId, number>>;
+  merges?: MergeSpec[];
 }
 
 export const PRESETS: Preset[] = [
@@ -334,38 +356,49 @@ export const PRESETS: Preset[] = [
   },
   {
     name: "Tusk Megalist",
-    description: "KO absorbs PSL & P2050 into a single joint committee.",
+    description:
+      "Joint KO+PSL+P2050+NL committee. PSL & P2050 transfer fully; Lewica keeps ~67% (13% defects to Razem, 20% stays home / poll inflation).",
     group: "tusk",
     period: "09/26",
     shares: {
-      KO: 40,
+      KO: 36.4,
       PIS: 23,
       KONF: 16,
       KKP: 8,
       LEW: 6.5,
       RP: 4,
       RAZ: 2.5,
-      PSL: 0,
-      P2050: 0,
+      PSL: 2.6,
+      P2050: 1.0,
     },
+    merges: [
+      { into: "KO", from: "PSL", keep: 1 },
+      { into: "KO", from: "P2050", keep: 1 },
+      { into: "KO", from: "LEW", keep: 0.67, redirect: { RAZ: 0.13 } },
+    ],
   },
   {
     name: "Tusk Megalist 10/26",
     description:
-      "KO absorbs PSL & P2050 into a single joint committee, on the October 2026 averages.",
+      "Joint KO+PSL+P2050+NL committee on the October 2026 averages. PSL & P2050 transfer fully; Lewica keeps ~67% (13% defects to Razem, 20% stays home / poll inflation).",
     group: "tusk",
     period: "10/26",
     shares: {
-      KO: 36.0,
+      KO: 31.65,
       PIS: 20.4,
       KONF: 14.05,
       KKP: 10.5,
       LEW: 6.35,
       RP: 5.2,
       RAZ: 3.9,
-      PSL: 0,
-      P2050: 0,
+      PSL: 3.3,
+      P2050: 1.05,
     },
+    merges: [
+      { into: "KO", from: "PSL", keep: 1 },
+      { into: "KO", from: "P2050", keep: 1 },
+      { into: "KO", from: "LEW", keep: 0.67, redirect: { RAZ: 0.13 } },
+    ],
   },
 ];
 

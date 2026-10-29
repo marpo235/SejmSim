@@ -6,7 +6,7 @@ import {
   type PartyId,
   type Scenario,
 } from "@/data/parties";
-import { applyShares } from "@/lib/scenario";
+import { applyPreset } from "@/lib/scenario";
 import { engineCoalitionOf, memberSeats, splitKonfederacja } from "@/lib/konfSplit";
 import { decodeState, encodeState, type AppState } from "@/lib/urlState";
 import { DICTS, LangContext, type Lang } from "@/lib/i18n";
@@ -106,7 +106,7 @@ export default function App() {
   const onPreset = useCallback(
     (name: string) => {
       const pr = PRESETS.find((x) => x.name === name);
-      if (pr) patch({ scenario: applyShares(state.scenario, pr.shares) });
+      if (pr) patch({ scenario: applyPreset(state.scenario, pr) });
     },
     [patch, state.scenario]
   );

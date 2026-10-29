@@ -63,8 +63,8 @@ const pl = {
     "09/26 wg Marcin Palade": "Sondaż Marcina Palade, wrzesień 2026.",
     "10/26 wg Marcin Palade": "Sondaż Marcina Palade, październik 2026.",
     "10/26 wg ewybory.eu": "Średnia publicznych sondaży wg ewybory.eu, październik 2026.",
-    "Tusk Megalist": "KO wchłania PSL i P2050 w jedną wspólną listę.",
-    "Tusk Megalist 10/26": "KO wchłania PSL i P2050 w jedną wspólną listę (średnie 10/26).",
+    "Tusk Megalist": "Wspólna lista KO+PSL+P2050+NL. Lewica przechodzi w ~67% (13% jej głosów do Razem, 20% nie głosuje).",
+    "Tusk Megalist 10/26": "Wspólna lista KO+PSL+P2050+NL (średnie 10/26). Lewica w ~67% — 13% do Razem, 20% nie głosuje.",
   } as Record<string, string>,
   main: {
     sejmTitle: "Sejm — 460 mandatów",

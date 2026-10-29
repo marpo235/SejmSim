@@ -41,7 +41,11 @@ export interface Prepared {
 
 export function prepare(scenario: Scenario): Prepared {
   const priors = buildPriors(scenario.w25);
-  const dispersion = buildDispersion(priors, scenario.alpha);
+  const dispersion = buildDispersion(
+    priors,
+    scenario.alpha,
+    scenario.dispersionBlend
+  );
   const thresholds = new Float64Array(PARTY_IDS.length);
   PARTY_IDS.forEach((p, i) => {
     thresholds[i] = scenario.coalitionFlag[p] ? 0.08 : 0.05;
