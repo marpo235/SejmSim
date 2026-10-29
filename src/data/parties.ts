@@ -256,9 +256,10 @@ export interface Preset {
   description: string;
   /**
    * Poll-source / scenario bucket shown in the sidebar:
-   * "palade" & "ewybory" live under SONDAŻE, "tusk" under SCENARIUSZE.
+   * "palade" & "ewybory" live under SONDAŻE, the "tusk*" buckets under
+   * SCENARIUSZE (one superlist family per poll source).
    */
-  group: "palade" | "ewybory" | "tusk";
+  group: "palade" | "ewybory" | "tuskpalade" | "tuskewybory";
   /**
    * Poll period tag "MM/YY". The top-bar preset dropdown only lists presets
    * from the most recent period found here.
@@ -267,6 +268,27 @@ export interface Preset {
   shares: Partial<Record<PartyId, number>>;
   merges?: MergeSpec[];
 }
+
+/**
+ * Shared superlist transfer model: PSL & P2050 fold into KO at 100% (centrist
+ * transfer — near-guaranteed same-list partners); Lewica keeps ~67% on the
+ * joint list, ~13% defects to Razem (bounded — NL's older electorate vs
+ * Razem's young one), ~20% stays home / poll inflation.
+ */
+const TUSK_MERGES: MergeSpec[] = [
+  { into: "KO", from: "PSL", keep: 1 },
+  { into: "KO", from: "P2050", keep: 1 },
+  { into: "KO", from: "LEW", keep: 0.67, redirect: { RAZ: 0.13 } },
+];
+
+/**
+ * Short labels used inside a merged committee's composite name
+ * (e.g. "KO+NL+PSL+PL2050"); falls back to PARTIES[p].short.
+ */
+export const MERGE_MEMBER_SHORTS: Partial<Record<PartyId, string>> = {
+  LEW: "NL",
+  P2050: "PL2050",
+};
 
 export const PRESETS: Preset[] = [
   {
@@ -355,56 +377,86 @@ export const PRESETS: Preset[] = [
     },
   },
   {
-    name: "Tusk Megalist",
+    name: "Tusk Megalist Palade 09/26",
     description:
-      "Joint KO+PSL+P2050+NL committee. PSL & P2050 transfer fully; Lewica keeps ~67% (13% defects to Razem, 20% stays home / poll inflation).",
-    group: "tusk",
+      "Joint KO+PSL+P2050+NL committee on the Marcin Palade September 2026 poll. PSL & P2050 transfer fully; Lewica keeps ~67% (13% defects to Razem, 20% stays home / poll inflation).",
+    group: "tuskpalade",
     period: "09/26",
     shares: {
-      KO: 36.4,
-      PIS: 23,
-      KONF: 16,
-      KKP: 8,
-      LEW: 6.5,
-      RP: 4,
-      RAZ: 2.5,
+      KO: 32.4,
+      PIS: 21.2,
+      KONF: 16.3,
+      KKP: 10.9,
+      LEW: 6.2,
+      RP: 5.7,
+      RAZ: 4.3,
       PSL: 2.6,
-      P2050: 1.0,
+      P2050: 0.4,
     },
-    merges: [
-      { into: "KO", from: "PSL", keep: 1 },
-      { into: "KO", from: "P2050", keep: 1 },
-      { into: "KO", from: "LEW", keep: 0.67, redirect: { RAZ: 0.13 } },
-    ],
+    merges: TUSK_MERGES,
   },
   {
-    name: "Tusk Megalist 10/26",
+    name: "Tusk Megalist Palade 10/26",
     description:
-      "Joint KO+PSL+P2050+NL committee on the October 2026 averages. PSL & P2050 transfer fully; Lewica keeps ~67% (13% defects to Razem, 20% stays home / poll inflation).",
-    group: "tusk",
+      "Joint KO+PSL+P2050+NL committee on the Marcin Palade October 2026 poll. PSL & P2050 transfer fully; Lewica keeps ~67% (13% defects to Razem, 20% stays home / poll inflation).",
+    group: "tuskpalade",
     period: "10/26",
     shares: {
-      KO: 31.65,
-      PIS: 20.4,
-      KONF: 14.05,
-      KKP: 10.5,
-      LEW: 6.35,
-      RP: 5.2,
-      RAZ: 3.9,
-      PSL: 3.3,
-      P2050: 1.05,
+      KO: 31.9,
+      PIS: 20.8,
+      KONF: 15.2,
+      KKP: 11.9,
+      LEW: 6.3,
+      RP: 5.5,
+      RAZ: 4.0,
+      PSL: 3.6,
+      P2050: 0.8,
     },
-    merges: [
-      { into: "KO", from: "PSL", keep: 1 },
-      { into: "KO", from: "P2050", keep: 1 },
-      { into: "KO", from: "LEW", keep: 0.67, redirect: { RAZ: 0.13 } },
-    ],
+    merges: TUSK_MERGES,
+  },
+  {
+    name: "Tusk Megalist ewybory 09/26",
+    description:
+      "Joint KO+PSL+P2050+NL committee on the ewybory.eu September 2026 average. PSL & P2050 transfer fully; Lewica keeps ~67% (13% defects to Razem, 20% stays home / poll inflation).",
+    group: "tuskewybory",
+    period: "09/26",
+    shares: {
+      KO: 30.8,
+      PIS: 19.1,
+      KONF: 13.5,
+      KKP: 8.4,
+      LEW: 7.2,
+      RP: 5.1,
+      RAZ: 3.8,
+      PSL: 3.0,
+      P2050: 2.5,
+    },
+    merges: TUSK_MERGES,
+  },
+  {
+    name: "Tusk Megalist ewybory 10/26",
+    description:
+      "Joint KO+PSL+P2050+NL committee on the ewybory.eu October 2026 average. PSL & P2050 transfer fully; Lewica keeps ~67% (13% defects to Razem, 20% stays home / poll inflation).",
+    group: "tuskewybory",
+    period: "10/26",
+    shares: {
+      KO: 31.4,
+      PIS: 20.0,
+      KONF: 12.9,
+      KKP: 9.1,
+      LEW: 6.4,
+      RP: 4.9,
+      RAZ: 3.8,
+      PSL: 3.0,
+      P2050: 1.3,
+    },
+    merges: TUSK_MERGES,
   },
 ];
 
 /** Sidebar group ordering: poll sources vs hypothetical scenarios. */
 export const POLL_GROUPS = ["palade", "ewybory"] as const;
-export const SCENARIO_GROUPS = ["tusk"] as const;
+export const SCENARIO_GROUPS = ["tuskpalade", "tuskewybory"] as const;
 export type PresetGroupId = (typeof POLL_GROUPS)[number] | (typeof SCENARIO_GROUPS)[number];
 
 export function presetsInGroup(group: PresetGroupId): Preset[] {

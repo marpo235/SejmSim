@@ -41,12 +41,16 @@ const pl = {
   presetNames: {
     "Marcin Palade Baseline": "Bazowy wg Marcina Palade",
     "ewybory.eu Average": "Bazowy wg ewybory.eu",
-    "Tusk Megalist": "Super-lista Tuska",
+    "Tusk Megalist Palade 09/26": "Super-lista Tuska (Palade)",
+    "Tusk Megalist Palade 10/26": "Super-lista Tuska (Palade)",
+    "Tusk Megalist ewybory 09/26": "Super-lista Tuska (ewybory.eu)",
+    "Tusk Megalist ewybory 10/26": "Super-lista Tuska (ewybory.eu)",
   } as Record<string, string>,
   presetGroups: {
     palade: "Marcin Palade",
     ewybory: "ewybory.eu",
-    tusk: "Super-lista Tuska",
+    tuskpalade: "Super-lista Tuska — Marcin Palade",
+    tuskewybory: "Super-lista Tuska — ewybory.eu",
   } as Record<string, string>,
   presetOptions: {
     "Marcin Palade Baseline": "Pocz. 09/26",
@@ -54,8 +58,10 @@ const pl = {
     "10/26 wg Marcin Palade": "10/26",
     "ewybory.eu Average": "Pocz. 09/26",
     "10/26 wg ewybory.eu": "10/26",
-    "Tusk Megalist": "09/26",
-    "Tusk Megalist 10/26": "10/26",
+    "Tusk Megalist Palade 09/26": "Koniec 09/26",
+    "Tusk Megalist Palade 10/26": "10/26",
+    "Tusk Megalist ewybory 09/26": "Pocz. 09/26",
+    "Tusk Megalist ewybory 10/26": "10/26",
   } as Record<string, string>,
   presetDescs: {
     "Marcin Palade Baseline": "Rozdrobniony wzrost prawicy; Lewica i R+ tuż nad progiem.",
@@ -63,8 +69,10 @@ const pl = {
     "09/26 wg Marcin Palade": "Sondaż Marcina Palade, wrzesień 2026.",
     "10/26 wg Marcin Palade": "Sondaż Marcina Palade, październik 2026.",
     "10/26 wg ewybory.eu": "Średnia publicznych sondaży wg ewybory.eu, październik 2026.",
-    "Tusk Megalist": "Wspólna lista KO+PSL+P2050+NL. Lewica przechodzi w ~67% (13% jej głosów do Razem, 20% nie głosuje).",
-    "Tusk Megalist 10/26": "Wspólna lista KO+PSL+P2050+NL (średnie 10/26). Lewica w ~67% — 13% do Razem, 20% nie głosuje.",
+    "Tusk Megalist Palade 09/26": "Wspólna lista KO+NL+PSL+PL2050 (Palade, wrzesień). Lewica w ~67% — 13% do Razem, 20% nie głosuje.",
+    "Tusk Megalist Palade 10/26": "Wspólna lista KO+NL+PSL+PL2050 (Palade, październik). Lewica w ~67% — 13% do Razem, 20% nie głosuje.",
+    "Tusk Megalist ewybory 09/26": "Wspólna lista KO+NL+PSL+PL2050 (ewybory.eu, wrzesień). Lewica w ~67% — 13% do Razem, 20% nie głosuje.",
+    "Tusk Megalist ewybory 10/26": "Wspólna lista KO+NL+PSL+PL2050 (ewybory.eu, październik). Lewica w ~67% — 13% do Razem, 20% nie głosuje.",
   } as Record<string, string>,
   main: {
     sejmTitle: "Sejm — 460 mandatów",
@@ -201,7 +209,8 @@ const en: typeof pl = {
   presetGroups: {
     palade: "Marcin Palade",
     ewybory: "ewybory.eu",
-    tusk: "Tusk Megalist",
+    tuskpalade: "Tusk Megalist — Marcin Palade",
+    tuskewybory: "Tusk Megalist — ewybory.eu",
   } as Record<string, string>,
   presetOptions: {
     "Marcin Palade Baseline": "Early 09/26",
@@ -209,8 +218,10 @@ const en: typeof pl = {
     "10/26 wg Marcin Palade": "10/26",
     "ewybory.eu Average": "Early 09/26",
     "10/26 wg ewybory.eu": "10/26",
-    "Tusk Megalist": "09/26",
-    "Tusk Megalist 10/26": "10/26",
+    "Tusk Megalist Palade 09/26": "Late 09/26",
+    "Tusk Megalist Palade 10/26": "10/26",
+    "Tusk Megalist ewybory 09/26": "Early 09/26",
+    "Tusk Megalist ewybory 10/26": "10/26",
   } as Record<string, string>,
   main: {
     sejmTitle: "Sejm — 460 seats",

@@ -1,10 +1,12 @@
 import {
   KONF_FACTIONS,
   KONF_MEMBER_IDS,
+  MERGE_MEMBER_SHORTS,
   PARTIES,
   PARTY_IDS,
   type CoalitionMember,
   type PartyId,
+  type Scenario,
 } from "@/data/parties";
 import type { MonteCarloResult } from "@/engine/types";
 import { useT } from "@/lib/i18n";
@@ -15,15 +17,32 @@ import { Badge } from "./ui/primitives";
 interface Props {
   seats: Record<PartyId, number>;
   konfSplit?: KonfSplit | null;
+  /** active merge blends — absorbed committees hide, targets get a composite label */
+  blend?: Scenario["dispersionBlend"];
   selected: CoalitionMember[];
   onToggle: (p: CoalitionMember) => void;
   mc: MonteCarloResult | null;
 }
 
-export function CoalitionBuilder({ seats, konfSplit, selected, onToggle, mc }: Props) {
+export function CoalitionBuilder({ seats, konfSplit, blend, selected, onToggle, mc }: Props) {
   const t = useT();
+  // merged committees: absorbed parties disappear from the legend, the target
+  // is renamed e.g. "KO+NL+PSL+PL2050" (components ordered by merged weight)
+  const absorbed = new Set<PartyId>();
+  const composite: Partial<Record<PartyId, string>> = {};
+  if (blend) {
+    for (const [into, comps] of Object.entries(blend)) {
+      const parts = Object.entries(comps ?? {}) as [PartyId, number][];
+      composite[into as PartyId] = parts
+        .sort((a, b) => (a[0] === into ? -1 : b[0] === into ? 1 : b[1] - a[1]))
+        .map(([p]) => MERGE_MEMBER_SHORTS[p] ?? PARTIES[p].short)
+        .join("+");
+      for (const [p] of parts) if (p !== into) absorbed.add(p);
+    }
+  }
   // when the Konfederacja split is on, the "Konf" button becomes NN + RN
   const members = PARTY_IDS.flatMap((p) => {
+    if (absorbed.has(p)) return [];
     if (p === "KONF" && konfSplit) {
       return KONF_MEMBER_IDS.map((f) => ({
         id: f as CoalitionMember,
@@ -31,7 +50,13 @@ export function CoalitionBuilder({ seats, konfSplit, selected, onToggle, mc }: P
         color: KONF_FACTIONS[f].color,
       }));
     }
-    return [{ id: p as CoalitionMember, short: PARTIES[p].short, color: PARTIES[p].color }];
+    return [
+      {
+        id: p as CoalitionMember,
+        short: composite[p] ?? PARTIES[p].short,
+        color: PARTIES[p].color,
+      },
+    ];
   });
   const total = selected.reduce((a, m) => a + memberSeats(m, seats, konfSplit), 0);
   const pct = Math.min(100, (total / 460) * 100);

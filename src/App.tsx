@@ -106,9 +106,25 @@ export default function App() {
   const onPreset = useCallback(
     (name: string) => {
       const pr = PRESETS.find((x) => x.name === name);
-      if (pr) patch({ scenario: applyPreset(state.scenario, pr) });
+      if (!pr) return;
+      const scenario = applyPreset(state.scenario, pr);
+      // absorbed committees vanish from the builder — migrate their picks to
+      // the merge target so a stale selection can't linger invisibly
+      let nextCoalition = coalition;
+      if (scenario.dispersionBlend) {
+        const reroute = new Map<CoalitionMember, CoalitionMember>();
+        for (const [into, comps] of Object.entries(scenario.dispersionBlend))
+          for (const p of Object.keys(comps ?? {}))
+            if (p !== into) reroute.set(p as CoalitionMember, into as CoalitionMember);
+        if (reroute.size) {
+          nextCoalition = [
+            ...new Set(coalition.map((m) => reroute.get(m) ?? m)),
+          ];
+        }
+      }
+      patch({ scenario, coalition: nextCoalition });
     },
-    [patch, state.scenario]
+    [patch, state.scenario, coalition]
   );
   const onToggleCoalition = useCallback(
     (p: CoalitionMember) =>
@@ -257,6 +273,7 @@ export default function App() {
           <CoalitionBuilder
             seats={det.seats}
             konfSplit={konfSplit}
+            blend={scenario.dispersionBlend}
             selected={coalition}
             onToggle={onToggleCoalition}
             mc={mc}
